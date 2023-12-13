@@ -1,13 +1,17 @@
 package pkg
 
 import (
-	"github.com/ethereum/go-ethereum/accounts"
+	"fmt"
+	"github.com/aori-io/aori-sdk-go/internal/types"
 	"github.com/gorilla/websocket"
+	"log"
 	"sync"
+	"time"
 )
 
 type AoriProvider interface {
-	Send()
+	Send(msg []byte) error
+	Receive() ([]byte, error)
 	Ping()
 	CheckAuth()
 	ViewOrderbook()
@@ -23,25 +27,64 @@ type AoriProvider interface {
 
 type provider struct {
 	requestConn *websocket.Conn
-	feedConn    *websocket.Conn
-	wallet      *accounts.Wallet
-	chainID     uint64
-	lastID      *sync.Mutex
-	walletAddr  string
-	walletSig   string
+	responseCh  chan []byte
+	mu          sync.Mutex
 }
 
-func NewAoriProvider() *provider {
-	// TODO
-	return &provider{}
+func NewAoriProvider() (*provider, error) {
+	fmt.Println("Initializing Bot")
+	conn, _, err := websocket.DefaultDialer.Dial(types.RequestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	p := &provider{
+		requestConn: conn,
+		responseCh:  make(chan []byte),
+	}
+
+	go func() {
+		defer func(requestConn *websocket.Conn) {
+			err := requestConn.Close()
+			if err != nil {
+
+			}
+		}(p.requestConn)
+
+		for {
+			_, message, err := p.requestConn.ReadMessage()
+			if err != nil {
+				log.Println("Error receiving message:", err)
+				return
+			}
+			p.responseCh <- message
+		}
+	}()
+
+	return p, nil
 }
 
-func NewAoriProviderWithURL(requestURL, feedURL string) *provider {
-	return &provider{}
+func (p *provider) Send(msg []byte) error {
+	fmt.Println("Sending message...")
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	err := p.requestConn.WriteMessage(websocket.TextMessage, msg)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (p *provider) Send() {
-	// TODO: impl
+func (p *provider) Receive() ([]byte, error) {
+
+	select {
+	case msg := <-p.responseCh:
+		//
+		return msg, nil
+	case <-time.After(5 * time.Second): // Adjust timeout as needed
+		return nil, fmt.Errorf("timeout: no response received")
+	}
 }
 
 func (p *provider) Ping() {
