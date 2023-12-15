@@ -61,6 +61,13 @@ type OrderTakenData struct {
 	TakenAt       uint64            `json:"takenAt"`
 }
 
+type PingRequest struct {
+	Id      int      `json:"id"`
+	JsonRPC string   `json:"jsonrpc"`
+	Method  string   `json:"method"`
+	Params  []string `json:"params"`
+}
+
 func NewOrderParameters(wallet string) OrderParameters {
 	return OrderParameters{
 		Offerer: wallet,

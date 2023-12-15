@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"fmt"
+	"github.com/aori-io/aori-sdk-go/internal"
 	"github.com/aori-io/aori-sdk-go/internal/types"
 	"github.com/gorilla/websocket"
 	"log"
@@ -12,7 +13,7 @@ import (
 type AoriProvider interface {
 	Send(msg []byte) error
 	Receive() ([]byte, error)
-	Ping()
+	Ping() (string, error)
 	CheckAuth()
 	ViewOrderbook()
 	MakeOrder()
@@ -44,12 +45,14 @@ func NewAoriProvider() (*provider, error) {
 	}
 
 	go func() {
-		defer func(requestConn *websocket.Conn) {
+		defer func(requestConn *websocket.Conn, requestChan chan []byte) {
 			err := requestConn.Close()
 			if err != nil {
-
+				fmt.Println("Error closing connection: ", err)
 			}
-		}(p.requestConn)
+
+			close(requestChan)
+		}(p.requestConn, p.responseCh)
 
 		for {
 			_, message, err := p.requestConn.ReadMessage()
@@ -77,18 +80,30 @@ func (p *provider) Send(msg []byte) error {
 }
 
 func (p *provider) Receive() ([]byte, error) {
-
 	select {
 	case msg := <-p.responseCh:
-		//
 		return msg, nil
 	case <-time.After(5 * time.Second): // Adjust timeout as needed
 		return nil, fmt.Errorf("timeout: no response received")
 	}
 }
 
-func (p *provider) Ping() {
-	// TODO: impl
+func (p *provider) Ping() (string, error) {
+	req, err := internal.CreatePingPayload()
+	if err != nil {
+		return "", fmt.Errorf("error creating ping payload: %s", err)
+	}
+	err = p.Send(req)
+	if err != nil {
+		return "", fmt.Errorf("error sending ping request: %s", err)
+	}
+
+	res, err := p.Receive()
+	if err != nil {
+		return "", fmt.Errorf("error getting response: %s", err)
+	}
+
+	return string(res), nil
 }
 
 func (p *provider) CheckAuth() {
