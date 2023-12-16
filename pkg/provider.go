@@ -1,11 +1,14 @@
 package pkg
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/aori-io/aori-sdk-go/internal"
 	"github.com/aori-io/aori-sdk-go/internal/types"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/websocket"
 	"log"
+	"os"
 	"sync"
 	"time"
 )
@@ -14,7 +17,8 @@ type AoriProvider interface {
 	Send(msg []byte) error
 	Receive() ([]byte, error)
 	Ping() (string, error)
-	CheckAuth()
+	AuthWallet() (types.AuthWalletResponse, error)
+	CheckAuth(jwt string) (string, error)
 	ViewOrderbook()
 	MakeOrder()
 	MakePrivateOrder()
@@ -30,10 +34,34 @@ type provider struct {
 	requestConn *websocket.Conn
 	responseCh  chan []byte
 	mu          sync.Mutex
+	wallet      *bind.TransactOpts
+	chainId     int
+	lastId      int
+	walletAddr  string
+	walletSig   string
 }
 
 func NewAoriProvider() (*provider, error) {
 	fmt.Println("Initializing Bot")
+
+	key := os.Getenv("PRIVATE_KEY")
+	if key == "" {
+		return nil, fmt.Errorf("missing PRIVATE_KEY")
+	}
+	address := os.Getenv("WALLET_ADDRESS")
+	if address == "" {
+		return nil, fmt.Errorf("missing WALLET_ADDRESS")
+	}
+	nodeURL := os.Getenv("NODE_URL")
+	if nodeURL == "" {
+		return nil, fmt.Errorf("missing NODE_URL")
+	}
+
+	wallet, chainID, walletAddr, walletSig, err := InitializeWallet(key, address, nodeURL)
+	if err != nil {
+		log.Fatal("Error initializing wallet:", err)
+	}
+
 	conn, _, err := websocket.DefaultDialer.Dial(types.RequestURL, nil)
 	if err != nil {
 		return nil, err
@@ -42,6 +70,11 @@ func NewAoriProvider() (*provider, error) {
 	p := &provider{
 		requestConn: conn,
 		responseCh:  make(chan []byte),
+		wallet:      wallet,
+		chainId:     int(chainID),
+		walletAddr:  walletAddr,
+		walletSig:   walletSig,
+		lastId:      0,
 	}
 
 	go func() {
@@ -106,8 +139,47 @@ func (p *provider) Ping() (string, error) {
 	return string(res), nil
 }
 
-func (p *provider) CheckAuth() {
-	// TODO: impl
+func (p *provider) AuthWallet() (types.AuthWalletResponse, error) {
+	var authWalletResponse types.AuthWalletResponse
+
+	req, err := internal.CreateAuthWalletPayload(p.walletAddr, p.walletSig)
+	if err != nil {
+		return authWalletResponse, fmt.Errorf("auth_wallet error creating payload: %s", err)
+	}
+	err = p.Send(req)
+	if err != nil {
+		return authWalletResponse, fmt.Errorf("auth_wallet error sending request: %s", err)
+	}
+
+	res, err := p.Receive()
+	if err != nil {
+		return authWalletResponse, fmt.Errorf("auth_wallet error getting response: %s", err)
+	}
+
+	err = json.Unmarshal(res, &authWalletResponse)
+	if err != nil {
+		return authWalletResponse, fmt.Errorf("auth_wallet error getting unmarshalling: %s", err)
+	}
+
+	return authWalletResponse, nil
+}
+
+func (p *provider) CheckAuth(jwt string) (string, error) {
+	req, err := internal.CreateCheckAuthPayload(jwt)
+	if err != nil {
+		return "", fmt.Errorf("check_auth error creating payload: %s", err)
+	}
+	err = p.Send(req)
+	if err != nil {
+		return "", fmt.Errorf("check_auth error sending request: %s", err)
+	}
+
+	res, err := p.Receive()
+	if err != nil {
+		return "", fmt.Errorf("check_auth error getting response: %s", err)
+	}
+
+	return string(res), nil
 }
 
 func (p *provider) ViewOrderbook() {

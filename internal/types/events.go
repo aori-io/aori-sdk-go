@@ -68,6 +68,29 @@ type PingRequest struct {
 	Params  []string `json:"params"`
 }
 
+type AuthWalletRequest struct {
+	Id      int                `json:"id"`
+	JsonRPC string             `json:"jsonrpc"`
+	Method  string             `json:"method"`
+	Params  []AuthWalletParams `json:"params"`
+}
+
+type AuthWalletParams struct {
+	Address   string `json:"address"`
+	Signature string `json:"signature"`
+}
+
+type CheckAuthRequest struct {
+	Id      int               `json:"id"`
+	JsonRPC string            `json:"jsonrpc"`
+	Method  string            `json:"method"`
+	Params  []CheckAuthParams `json:"params"`
+}
+
+type CheckAuthParams struct {
+	Auth string `json:"auth"`
+}
+
 func NewOrderParameters(wallet string) OrderParameters {
 	return OrderParameters{
 		Offerer: wallet,

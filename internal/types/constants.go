@@ -7,6 +7,6 @@ const (
 	//CURRENT_SEAPORT_ADDRESS = "00000000000000adc04c56bf30ac9d3c0aaf14dc"
 	//CURRENT_SEAPORT_VERSION = "1.5"
 	//DEFAULT_CONDUIT_KEY     = "0x0000000000000000000000000000000000000000000000000000000000000000"
-	RequestURL = "wss://dev.api.beta.order.aori.io/"
+	RequestURL = "wss://dev.api.aori.io/"
 	//MARKET_FEED_URL         = "wss://dev.beta.feed.aori.io/"
 )

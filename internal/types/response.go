@@ -1,7 +1,7 @@
 package types
 
 type AoriOrderStatusResponse struct {
-	ID     *uint64             `json:"id"`
+	ID     int                 `json:"id"`
 	Result AoriOrderStatusData `json:"result"`
 }
 
@@ -10,10 +10,19 @@ type AoriOrderStatusData struct {
 }
 
 type AoriViewOrderbookResponse struct {
-	ID     *uint64           `json:"id"`
+	ID     int               `json:"id"`
 	Result AoriOrderbookData `json:"result"`
 }
 
 type AoriOrderbookData struct {
 	Orders []OrderCreatedData `json:"orders"`
+}
+
+type AuthWalletResponse struct {
+	ID     int            `json:"id"`
+	Result AuthWalletData `json:"result"`
+}
+
+type AuthWalletData struct {
+	Auth string `json:"auth"`
 }

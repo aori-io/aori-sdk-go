@@ -12,7 +12,14 @@ func main() {
 		return
 	}
 
-	response, err := bot.Ping()
+	auth, err := bot.AuthWallet()
+	if err != nil {
+		fmt.Println("Error: ", err)
+	}
+
+	fmt.Println("Received response:", auth)
+
+	response, err := bot.CheckAuth(auth.Result.Auth)
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
