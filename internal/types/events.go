@@ -22,12 +22,12 @@ type OrderCreatedData struct {
 	OrderHash     string            `json:"orderHash"`
 	InputToken    string            `json:"inputToken"`
 	OutputToken   string            `json:"outputToken"`
-	InputAmount   uint64            `json:"inputAmount"`
-	OutputAmount  uint64            `json:"outputAmount"`
+	InputAmount   string            `json:"inputAmount"`
+	OutputAmount  string            `json:"outputAmount"`
 	ChainID       int64             `json:"chainId"`
 	Active        bool              `json:"active"`
-	CreatedAt     uint64            `json:"createdAt"`
-	LastUpdatedAt uint64            `json:"lastUpdatedAt"`
+	CreatedAt     int               `json:"createdAt"`
+	LastUpdatedAt int               `json:"lastUpdatedAt"`
 	IsPublic      bool              `json:"isPublic"`
 	Rate          *float64          `json:"rate,omitempty"`
 }
@@ -89,6 +89,24 @@ type CheckAuthRequest struct {
 
 type CheckAuthParams struct {
 	Auth string `json:"auth"`
+}
+
+type ViewOrderbookRequest struct {
+	Id      int                   `json:"id"`
+	JsonRPC string                `json:"jsonrpc"`
+	Method  string                `json:"method"`
+	Params  []ViewOrderbookParams `json:"params"`
+}
+
+type ViewOrderbookParams struct {
+	ChainId int                `json:"chainId"`
+	Query   ViewOrderbookQuery `json:"query"`
+	Side    string             `json:"side"`
+}
+
+type ViewOrderbookQuery struct {
+	Base  string `json:"base"`
+	Quote string `json:"quote"`
 }
 
 func NewOrderParameters(wallet string) OrderParameters {

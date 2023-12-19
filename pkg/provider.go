@@ -19,7 +19,7 @@ type AoriProvider interface {
 	Ping() (string, error)
 	AuthWallet() (types.AuthWalletResponse, error)
 	CheckAuth(jwt string) (string, error)
-	ViewOrderbook()
+	ViewOrderbook(chainId int, base, quote, side string) (types.AoriViewOrderbookResponse, error)
 	MakeOrder()
 	MakePrivateOrder()
 	TakeOrder()
@@ -182,8 +182,29 @@ func (p *provider) CheckAuth(jwt string) (string, error) {
 	return string(res), nil
 }
 
-func (p *provider) ViewOrderbook() {
-	// TODO: impl
+func (p *provider) ViewOrderbook(chainId int, base, quote, side string) (types.AoriViewOrderbookResponse, error) {
+	var viewOrderbookResponse types.AoriViewOrderbookResponse
+
+	req, err := internal.CreateViewOrderbookPayload(chainId, base, quote, side)
+	if err != nil {
+		return viewOrderbookResponse, fmt.Errorf("view_orderbook error creating payload: %s", err)
+	}
+	err = p.Send(req)
+	if err != nil {
+		return viewOrderbookResponse, fmt.Errorf("view_orderbook error sending request: %s", err)
+	}
+
+	res, err := p.Receive()
+	if err != nil {
+		return viewOrderbookResponse, fmt.Errorf("view_orderbook error getting response: %s", err)
+	}
+
+	err = json.Unmarshal(res, &viewOrderbookResponse)
+	if err != nil {
+		return viewOrderbookResponse, fmt.Errorf("view_orderbook error getting unmarshalling: %s", err)
+	}
+
+	return viewOrderbookResponse, nil
 }
 
 func (p *provider) MakeOrder() {

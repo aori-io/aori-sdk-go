@@ -49,3 +49,23 @@ func CreateCheckAuthPayload(jwt string) ([]byte, error) {
 	}
 	return b, nil
 }
+
+func CreateViewOrderbookPayload(chainId int, base, quote, side string) ([]byte, error) {
+	req := types.ViewOrderbookRequest{
+		Id:      2,
+		JsonRPC: "2.0",
+		Method:  "aori_viewOrderbook",
+		Params: []types.ViewOrderbookParams{{ChainId: chainId,
+			Query: types.ViewOrderbookQuery{
+				Base:  base,
+				Quote: quote,
+			}, Side: side,
+		}},
+	}
+
+	b, err := json.Marshal(&req)
+	if err != nil {
+		return nil, err
+	}
+	return b, nil
+}
