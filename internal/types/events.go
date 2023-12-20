@@ -109,6 +109,24 @@ type ViewOrderbookQuery struct {
 	Quote string `json:"quote"`
 }
 
+type MakeOrderRequest struct {
+	Id      int               `json:"id"`
+	JsonRPC string            `json:"jsonrpc"`
+	Method  string            `json:"method"`
+	Params  []MakeOrderParams `json:"params"`
+}
+
+type MakeOrderParams struct {
+	Order    MakeOrderQuery `json:"order"`
+	IsPublic bool           `json:"isPublic"`
+	ChainId  int            `json:"chainId"`
+}
+
+type MakeOrderQuery struct {
+	Signature  string          `json:"signature"`
+	Parameters OrderParameters `json:"parameters"`
+}
+
 func NewOrderParameters(wallet string) OrderParameters {
 	return OrderParameters{
 		Offerer: wallet,

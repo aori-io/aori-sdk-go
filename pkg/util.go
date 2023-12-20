@@ -9,6 +9,14 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
+type MakeOrderInput struct {
+	WalletAddress string
+	SellToken     string
+	SellAmount    string
+	BuyToken      string
+	BuyAmount     string
+}
+
 func InitializeWallet(key, address, nodeURL string) (*bind.TransactOpts, uint64, string, string, error) {
 	client, err := ethclient.Dial(nodeURL)
 	if err != nil {

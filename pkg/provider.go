@@ -74,7 +74,7 @@ func NewAoriProvider() (*provider, error) {
 		chainId:     int(chainID),
 		walletAddr:  walletAddr,
 		walletSig:   walletSig,
-		lastId:      0,
+		lastId:      1,
 	}
 
 	go func() {
@@ -109,6 +109,9 @@ func (p *provider) Send(msg []byte) error {
 	if err != nil {
 		return err
 	}
+
+	p.lastId++
+
 	return nil
 }
 
@@ -122,7 +125,7 @@ func (p *provider) Receive() ([]byte, error) {
 }
 
 func (p *provider) Ping() (string, error) {
-	req, err := internal.CreatePingPayload()
+	req, err := internal.CreatePingPayload(p.lastId)
 	if err != nil {
 		return "", fmt.Errorf("error creating ping payload: %s", err)
 	}
@@ -142,7 +145,7 @@ func (p *provider) Ping() (string, error) {
 func (p *provider) AuthWallet() (types.AuthWalletResponse, error) {
 	var authWalletResponse types.AuthWalletResponse
 
-	req, err := internal.CreateAuthWalletPayload(p.walletAddr, p.walletSig)
+	req, err := internal.CreateAuthWalletPayload(p.lastId, p.walletAddr, p.walletSig)
 	if err != nil {
 		return authWalletResponse, fmt.Errorf("auth_wallet error creating payload: %s", err)
 	}
@@ -165,7 +168,7 @@ func (p *provider) AuthWallet() (types.AuthWalletResponse, error) {
 }
 
 func (p *provider) CheckAuth(jwt string) (string, error) {
-	req, err := internal.CreateCheckAuthPayload(jwt)
+	req, err := internal.CreateCheckAuthPayload(p.lastId, jwt)
 	if err != nil {
 		return "", fmt.Errorf("check_auth error creating payload: %s", err)
 	}
@@ -185,7 +188,7 @@ func (p *provider) CheckAuth(jwt string) (string, error) {
 func (p *provider) ViewOrderbook(chainId int, base, quote, side string) (types.AoriViewOrderbookResponse, error) {
 	var viewOrderbookResponse types.AoriViewOrderbookResponse
 
-	req, err := internal.CreateViewOrderbookPayload(chainId, base, quote, side)
+	req, err := internal.CreateViewOrderbookPayload(p.lastId, chainId, base, quote, side)
 	if err != nil {
 		return viewOrderbookResponse, fmt.Errorf("view_orderbook error creating payload: %s", err)
 	}
@@ -207,8 +210,22 @@ func (p *provider) ViewOrderbook(chainId int, base, quote, side string) (types.A
 	return viewOrderbookResponse, nil
 }
 
-func (p *provider) MakeOrder() {
-	// TODO: impl
+func (p *provider) MakeOrder(orderParams MakeOrderInput) (string, error) {
+	req, err := internal.CreateMakeOrderPayload(p.lastId)
+	if err != nil {
+		return "", fmt.Errorf("make_order error creating payload: %s", err)
+	}
+	err = p.Send(req)
+	if err != nil {
+		return "", fmt.Errorf("make_order error sending request: %s", err)
+	}
+
+	res, err := p.Receive()
+	if err != nil {
+		return "", fmt.Errorf("make_order error getting response: %s", err)
+	}
+
+	return string(res), nil
 }
 
 func (p *provider) MakePrivateOrder() {
