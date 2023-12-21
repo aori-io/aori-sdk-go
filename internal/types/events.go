@@ -124,7 +124,7 @@ type MakeOrderParams struct {
 
 type MakeOrderQuery struct {
 	Signature  string          `json:"signature"`
-	Parameters OrderParameters `json:"parameters"`
+	Parameters OrderComponents `json:"parameters"`
 }
 
 func NewOrderParameters(wallet string) OrderParameters {

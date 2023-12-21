@@ -53,15 +53,16 @@ type ConsiderationItem struct {
 }
 
 type OrderComponents struct {
-	Offerer       string
-	Zone          string
-	Offer         []OfferItem
-	Consideration []ConsiderationItem
-	OrderType     OrderType
-	StartTime     string
-	EndTime       string
-	ZoneHash      string
-	Salt          string
-	ConduitKey    string
-	Counter       string
+	Offerer                         string              `json:"offerer,omitempty"`
+	Zone                            string              `json:"zone,omitempty"`
+	Offer                           []OfferItem         `json:"offer,omitempty"`
+	Consideration                   []ConsiderationItem `json:"consideration,omitempty"`
+	OrderType                       OrderType           `json:"orderType,omitempty"`
+	StartTime                       string              `json:"startTime,omitempty"`
+	EndTime                         string              `json:"endTime,omitempty"`
+	ZoneHash                        string              `json:"zoneHash,omitempty"`
+	Salt                            string              `json:"salt,omitempty"`
+	ConduitKey                      string              `json:"conduitKey,omitempty"`
+	TotalOriginalConsiderationItems int16               `json:"totalOriginalConsiderationItems,omitempty"`
+	Counter                         string              `json:"counter,omitempty"`
 }

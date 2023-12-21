@@ -3,8 +3,8 @@ package pkg
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/aori-io/aori-sdk-go/internal"
 	"github.com/aori-io/aori-sdk-go/internal/types"
+	"github.com/aori-io/aori-sdk-go/internal/util"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/websocket"
 	"log"
@@ -125,7 +125,7 @@ func (p *provider) Receive() ([]byte, error) {
 }
 
 func (p *provider) Ping() (string, error) {
-	req, err := internal.CreatePingPayload(p.lastId)
+	req, err := util.CreatePingPayload(p.lastId)
 	if err != nil {
 		return "", fmt.Errorf("error creating ping payload: %s", err)
 	}
@@ -145,7 +145,7 @@ func (p *provider) Ping() (string, error) {
 func (p *provider) AuthWallet() (types.AuthWalletResponse, error) {
 	var authWalletResponse types.AuthWalletResponse
 
-	req, err := internal.CreateAuthWalletPayload(p.lastId, p.walletAddr, p.walletSig)
+	req, err := util.CreateAuthWalletPayload(p.lastId, p.walletAddr, p.walletSig)
 	if err != nil {
 		return authWalletResponse, fmt.Errorf("auth_wallet error creating payload: %s", err)
 	}
@@ -168,7 +168,7 @@ func (p *provider) AuthWallet() (types.AuthWalletResponse, error) {
 }
 
 func (p *provider) CheckAuth(jwt string) (string, error) {
-	req, err := internal.CreateCheckAuthPayload(p.lastId, jwt)
+	req, err := util.CreateCheckAuthPayload(p.lastId, jwt)
 	if err != nil {
 		return "", fmt.Errorf("check_auth error creating payload: %s", err)
 	}
@@ -188,7 +188,7 @@ func (p *provider) CheckAuth(jwt string) (string, error) {
 func (p *provider) ViewOrderbook(chainId int, base, quote, side string) (types.AoriViewOrderbookResponse, error) {
 	var viewOrderbookResponse types.AoriViewOrderbookResponse
 
-	req, err := internal.CreateViewOrderbookPayload(p.lastId, chainId, base, quote, side)
+	req, err := util.CreateViewOrderbookPayload(p.lastId, chainId, base, quote, side)
 	if err != nil {
 		return viewOrderbookResponse, fmt.Errorf("view_orderbook error creating payload: %s", err)
 	}
@@ -211,7 +211,9 @@ func (p *provider) ViewOrderbook(chainId int, base, quote, side string) (types.A
 }
 
 func (p *provider) MakeOrder(orderParams MakeOrderInput) (string, error) {
-	req, err := internal.CreateMakeOrderPayload(p.lastId)
+	fmt.Println("CHAIN: ", p.chainId)
+
+	req, err := util.CreateMakeOrderPayload(p.lastId, p.chainId, p.walletAddr, orderParams.SellToken, orderParams.SellAmount, orderParams.BuyToken, orderParams.BuyAmount)
 	if err != nil {
 		return "", fmt.Errorf("make_order error creating payload: %s", err)
 	}

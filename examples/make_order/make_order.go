@@ -19,15 +19,16 @@ func main() {
 
 	fmt.Println("Received response:", auth)
 
-	response, err := bot.ViewOrderbook(5, "0xD3664B5e72B46eaba722aB6f43c22dBF40181954", "0x2715Ccea428F8c7694f7e78B2C89cb454c5F7294", "BUY")
+	orderParams := pkg.MakeOrderInput{
+		SellToken:  "0xD3664B5e72B46eaba722aB6f43c22dBF40181954",
+		SellAmount: "1000000000000000000",
+		BuyToken:   "0x2715Ccea428F8c7694f7e78B2C89cb454c5F7294",
+		BuyAmount:  "1000000",
+	}
+	response, err := bot.MakeOrder(orderParams)
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
 
-	if len(response.Result.Orders) == 0 {
-		fmt.Println("Received response:", response)
-	}
-	for _, s := range response.Result.Orders {
-		fmt.Println("orderHash:", s.OrderHash)
-	}
+	fmt.Println("Received response:", response)
 }

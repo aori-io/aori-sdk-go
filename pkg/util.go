@@ -10,11 +10,10 @@ import (
 )
 
 type MakeOrderInput struct {
-	WalletAddress string
-	SellToken     string
-	SellAmount    string
-	BuyToken      string
-	BuyAmount     string
+	SellToken  string
+	SellAmount string
+	BuyToken   string
+	BuyAmount  string
 }
 
 func InitializeWallet(key, address, nodeURL string) (*bind.TransactOpts, uint64, string, string, error) {
