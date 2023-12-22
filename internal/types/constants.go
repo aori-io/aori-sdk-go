@@ -3,7 +3,8 @@ package types
 import "github.com/ethereum/go-ethereum/signer/core/apitypes"
 
 const (
-	DefaultOrderAddress   = "EF3137050f3a49ECAe2D2Bae0154B895310D9Dc4"
+	//DefaultOrderAddress = "EF3137050f3a49ECAe2D2Bae0154B895310D9Dc4"
+	DefaultOrderAddress   = "eA2b4e7F02b859305093f9F4778a19D66CA176d5"
 	DefaultConduitKey     = "0x0000000000000000000000000000000000000000000000000000000000000000"
 	RequestURL            = "wss://dev.api.aori.io/"
 	DefaultZoneHash       = "0x0000000000000000000000000000000000000000000000000000000000000000"

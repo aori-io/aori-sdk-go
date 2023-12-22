@@ -25,7 +25,7 @@ func SignOrder(order types.OrderComponents) (string, error) {
 	domain := apitypes.TypedDataDomain{
 		Name:              "Seaport",
 		Version:           types.CurrentSeaportVersion,
-		ChainId:           math.NewHexOrDecimal256(5),
+		ChainId:           math.NewHexOrDecimal256(5), // TODO make dynamic
 		VerifyingContract: types.SeaportAddress,
 	}
 	typedData := apitypes.TypedData{
@@ -75,7 +75,6 @@ func EncodeForSigning(typedData apitypes.TypedData) (common.Hash, error) {
 	}
 	typedDataHash, err := typedData.HashStruct(typedData.PrimaryType, typedData.Message)
 	if err != nil {
-		fmt.Println("TEST", typedData.Message["offerer"])
 		return common.Hash{}, err
 	}
 	rawData := []byte(fmt.Sprintf("\x19\x01%s%s", string(domainSeparator), string(typedDataHash)))
