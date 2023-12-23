@@ -127,6 +127,19 @@ type MakeOrderQuery struct {
 	Parameters OrderParameters `json:"parameters"`
 }
 
+type CancelOrderRequest struct {
+	Id      int                 `json:"id"`
+	JsonRPC string              `json:"jsonrpc"`
+	Method  string              `json:"method"`
+	Params  []CancelOrderParams `json:"params"`
+}
+
+type CancelOrderParams struct {
+	OrderId   string `json:"orderId"`
+	Signature string `json:"signature"`
+	ApiKey    string `json:"apiKey"`
+}
+
 type OrderParameters struct {
 	Offerer                         string              `json:"offerer"`
 	Zone                            string              `json:"zone"`

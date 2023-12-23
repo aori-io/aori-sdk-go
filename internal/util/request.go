@@ -3,7 +3,7 @@ package util
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/aori-io/aori-sdk-go/internal/types"
+	"github.com/aori-io/aori-sdk-go/pkg/types"
 	"time"
 )
 
@@ -72,7 +72,7 @@ func CreateViewOrderbookPayload(id int, chainId int, base, quote, side string) (
 	return b, nil
 }
 
-func CreateMakeOrderPayload(id, chainId int, walletAddress, sellToken, sellAmount, buyToken, buyAmount string) ([]byte, error) {
+func CreateMakeOrderPayload(id, chainId int, walletAddress, sellToken, sellAmount, buyToken, buyAmount string, isPublic bool) ([]byte, error) {
 	startTime := time.Now()
 	endTime := startTime.AddDate(0, 0, 1)
 	req := types.MakeOrderRequest{
@@ -110,7 +110,7 @@ func CreateMakeOrderPayload(id, chainId int, walletAddress, sellToken, sellAmoun
 					Counter:                         "0",
 				},
 			},
-			IsPublic: true,
+			IsPublic: isPublic,
 			ChainId:  chainId,
 		}},
 	}
@@ -126,5 +126,31 @@ func CreateMakeOrderPayload(id, chainId int, walletAddress, sellToken, sellAmoun
 	if err != nil {
 		return nil, fmt.Errorf("make_order error marshalling order: %s", err)
 	}
+	return b, nil
+}
+
+func CreateCancelOrderPayload(id int, orderId, apiKey string) ([]byte, error) {
+	sig, err := SignCancelOrder(orderId)
+	if err != nil {
+		return nil, err
+	}
+
+	req := types.CancelOrderRequest{
+		Id:      id,
+		JsonRPC: "2.0",
+		Method:  "aori_cancelOrder",
+		Params: []types.CancelOrderParams{{
+			OrderId:   orderId,
+			Signature: sig,
+			ApiKey:    apiKey,
+		}},
+	}
+
+	b, err := json.Marshal(&req)
+	if err != nil {
+		return nil, fmt.Errorf("make_order error marshalling order: %s", err)
+	}
+
+	fmt.Println(string(b))
 	return b, nil
 }

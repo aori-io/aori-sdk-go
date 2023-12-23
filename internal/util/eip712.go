@@ -3,18 +3,17 @@ package util
 import (
 	"crypto/ecdsa"
 	"fmt"
-	"github.com/aori-io/aori-sdk-go/internal/types"
+	types2 "github.com/aori-io/aori-sdk-go/pkg/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/signer/core/apitypes"
-	"github.com/storyicon/sigverify"
 	"os"
 	"strings"
 )
 
 // SignOrder - Signs Order
-func SignOrder(order types.OrderParameters, chainId int) (string, error) {
+func SignOrder(order types2.OrderParameters, chainId int) (string, error) {
 	message := map[string]interface{}{
 		"offerer": order.Offerer,
 		"zone":    order.Zone,
@@ -45,12 +44,12 @@ func SignOrder(order types.OrderParameters, chainId int) (string, error) {
 
 	domain := apitypes.TypedDataDomain{
 		Name:              "Seaport",
-		Version:           types.CurrentSeaportVersion,
+		Version:           types2.CurrentSeaportVersion,
 		ChainId:           math.NewHexOrDecimal256(int64(chainId)),
-		VerifyingContract: types.SeaportAddress,
+		VerifyingContract: types2.SeaportAddress,
 	}
 	typedData := apitypes.TypedData{
-		Types:       types.Eip712OrderType,
+		Types:       types2.Eip712OrderType,
 		PrimaryType: "OrderComponents",
 		Domain:      domain,
 		Message:     message,
@@ -86,12 +85,6 @@ func SignTypedData(typedData apitypes.TypedData, privateKey *ecdsa.PrivateKey) (
 	}
 	sig[64] += 27
 
-	ex, err := sigverify.RecoveryTypedDataAddressEx(typedData, sig)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Println("Address: ", ex.String())
-
 	return sig, nil
 }
 
@@ -104,4 +97,29 @@ func EncodeForSigning(typedData apitypes.TypedData) ([]byte, error) {
 	}
 
 	return hash, nil
+}
+
+// SignCancelOrder - Generates signature for cancel_order
+func SignCancelOrder(orderId string) (string, error) {
+	key := os.Getenv("PRIVATE_KEY")
+	if key == "" {
+		return "", fmt.Errorf("missing PRIVATE_KEY")
+	}
+	privateKey, err := crypto.HexToECDSA(key)
+	if err != nil {
+		return "", err
+	}
+
+	hash := crypto.Keccak256Hash([]byte(orderId))
+
+	sigBytes, err := crypto.Sign(hash.Bytes(), privateKey)
+	if err != nil {
+		return "", err
+	}
+
+	sigBytes[64] += 27
+
+	signature := fmt.Sprintf("0x%s", common.Bytes2Hex(sigBytes))
+
+	return signature, nil
 }
