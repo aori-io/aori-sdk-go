@@ -124,48 +124,20 @@ type MakeOrderParams struct {
 
 type MakeOrderQuery struct {
 	Signature  string          `json:"signature"`
-	Parameters OrderComponents `json:"parameters"`
+	Parameters OrderParameters `json:"parameters"`
 }
 
-func NewOrderParameters(wallet string) OrderParameters {
-	return OrderParameters{
-		Offerer: wallet,
-		Zone:    DefaultOrderAddress,
-		Offer: []OfferItem{
-			NewOfferItem(1, "", "0", "", ""),
-		},
-		Consideration: []ConsiderationItem{
-			NewConsiderationItem(1, "", "0", "", "", wallet),
-		},
-		OrderType:                       3,
-		StartTime:                       "",
-		EndTime:                         "",
-		ZoneHash:                        "0x0000000000000000000000000000000000000000000000000000000000000000",
-		Salt:                            "0",
-		ConduitKey:                      "0x0000000000000000000000000000000000000000000000000000000000000000",
-		TotalOriginalConsiderationItems: 1,
-	}
-}
-
-// DEPRECATE:
-
-func NewOfferItem(itemType uint8, token, identifierOrCriteria, startAmount, endAmount string) OfferItem {
-	return OfferItem{
-		ItemType:             itemType,
-		Token:                token,
-		IdentifierOrCriteria: identifierOrCriteria,
-		StartAmount:          startAmount,
-		EndAmount:            endAmount,
-	}
-}
-
-func NewConsiderationItem(itemType uint8, token, identifierOrCriteria, startAmount, endAmount, recipient string) ConsiderationItem {
-	return ConsiderationItem{
-		ItemType:             itemType,
-		Token:                token,
-		IdentifierOrCriteria: identifierOrCriteria,
-		StartAmount:          startAmount,
-		EndAmount:            endAmount,
-		Recipient:            recipient,
-	}
+type OrderParameters struct {
+	Offerer                         string              `json:"offerer"`
+	Zone                            string              `json:"zone"`
+	Offer                           []OfferItem         `json:"offer"`
+	Consideration                   []ConsiderationItem `json:"consideration"`
+	OrderType                       OrderType           `json:"orderType"`
+	StartTime                       string              `json:"startTime"`
+	EndTime                         string              `json:"endTime"`
+	ZoneHash                        string              `json:"zoneHash"`
+	Salt                            string              `json:"salt"`
+	ConduitKey                      string              `json:"conduitKey"`
+	TotalOriginalConsiderationItems int16               `json:"totalOriginalConsiderationItems"`
+	Counter                         string              `json:"counter"`
 }

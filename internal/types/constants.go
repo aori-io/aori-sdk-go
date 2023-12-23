@@ -3,12 +3,11 @@ package types
 import "github.com/ethereum/go-ethereum/signer/core/apitypes"
 
 const (
-	//DefaultOrderAddress = "EF3137050f3a49ECAe2D2Bae0154B895310D9Dc4"
-	DefaultOrderAddress   = "eA2b4e7F02b859305093f9F4778a19D66CA176d5"
+	DefaultOrderAddress   = "0xEF3137050f3a49ECAe2D2Bae0154B895310D9Dc4"
 	DefaultConduitKey     = "0x0000000000000000000000000000000000000000000000000000000000000000"
-	RequestURL            = "wss://dev.api.aori.io/"
+	RequestURL            = "ws://localhost:8080/"
 	DefaultZoneHash       = "0x0000000000000000000000000000000000000000000000000000000000000000"
-	SeaportAddress        = "00000000000000adc04c56bf30ac9d3c0aaf14dc"
+	SeaportAddress        = "0x00000000000000adc04c56bf30ac9d3c0aaf14dc"
 	CurrentSeaportVersion = "1.5"
 
 	//DEFAULT_DURATION        = 86400000
@@ -37,7 +36,7 @@ var Eip712OrderType = apitypes.Types{
 	"OrderComponents": {
 		{
 			Name: "offerer",
-			Type: "address", // ERROR HERE
+			Type: "address",
 		},
 		{
 			Name: "zone",

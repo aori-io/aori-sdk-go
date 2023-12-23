@@ -75,7 +75,6 @@ func CreateViewOrderbookPayload(id int, chainId int, base, quote, side string) (
 func CreateMakeOrderPayload(id, chainId int, walletAddress, sellToken, sellAmount, buyToken, buyAmount string) ([]byte, error) {
 	startTime := time.Now()
 	endTime := startTime.AddDate(0, 0, 1)
-
 	req := types.MakeOrderRequest{
 		Id:      id,
 		JsonRPC: "2.0",
@@ -83,25 +82,25 @@ func CreateMakeOrderPayload(id, chainId int, walletAddress, sellToken, sellAmoun
 		Params: []types.MakeOrderParams{{
 			Order: types.MakeOrderQuery{
 				Signature: "",
-				Parameters: types.OrderComponents{
+				Parameters: types.OrderParameters{
 					Offerer: walletAddress,
 					Zone:    types.DefaultOrderAddress,
 					Offer: []types.OfferItem{{
-						ItemType:             1,
+						ItemType:             types.ERC20,
 						Token:                sellToken,
 						IdentifierOrCriteria: "0",
 						StartAmount:          sellAmount,
 						EndAmount:            sellAmount,
 					}},
 					Consideration: []types.ConsiderationItem{{
-						ItemType:             1,
+						ItemType:             types.ERC20,
 						Token:                buyToken,
 						IdentifierOrCriteria: "0",
 						StartAmount:          buyAmount,
 						EndAmount:            buyAmount,
 						Recipient:            walletAddress,
 					}},
-					OrderType:                       3,
+					OrderType:                       types.PartialRestricted,
 					StartTime:                       fmt.Sprintf("%v", startTime.Unix()),
 					EndTime:                         fmt.Sprintf("%v", endTime.Unix()), // 24 hours later
 					ZoneHash:                        types.DefaultZoneHash,
@@ -116,12 +115,10 @@ func CreateMakeOrderPayload(id, chainId int, walletAddress, sellToken, sellAmoun
 		}},
 	}
 
-	sig, err := SignOrder(req.Params[0].Order.Parameters)
+	sig, err := SignOrder(req.Params[0].Order.Parameters, chainId)
 	if err != nil {
 		return nil, fmt.Errorf("make_order error signing order: %s", err)
 	}
-
-	fmt.Println("SIGNATURE: ", sig)
 
 	req.Params[0].Order.Signature = sig
 

@@ -20,7 +20,7 @@ type AoriProvider interface {
 	AuthWallet() (types.AuthWalletResponse, error)
 	CheckAuth(jwt string) (string, error)
 	ViewOrderbook(chainId int, base, quote, side string) (types.AoriViewOrderbookResponse, error)
-	MakeOrder()
+	MakeOrder(orderParams MakeOrderInput) (string, error)
 	MakePrivateOrder()
 	TakeOrder()
 	CancelOrder()
