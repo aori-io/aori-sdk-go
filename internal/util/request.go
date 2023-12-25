@@ -148,9 +148,29 @@ func CreateCancelOrderPayload(id int, orderId, apiKey string) ([]byte, error) {
 
 	b, err := json.Marshal(&req)
 	if err != nil {
-		return nil, fmt.Errorf("make_order error marshalling order: %s", err)
+		return nil, fmt.Errorf("cancel_order error marshalling order: %s", err)
 	}
 
 	fmt.Println(string(b))
+	return b, nil
+}
+
+func CreateAccountOrdersPayload(id int, wallet, signature, apiKey string) ([]byte, error) {
+	req := types.AccountOrdersRequest{
+		Id:      id,
+		JsonRPC: "2.0",
+		Method:  "aori_accountOrders",
+		Params: []types.AccountOrdersParams{{
+			Offerer:   wallet,
+			Signature: signature,
+			ApiKey:    apiKey,
+		}},
+	}
+
+	b, err := json.Marshal(&req)
+	if err != nil {
+		return nil, fmt.Errorf("account_orders error marshalling order: %s", err)
+	}
+
 	return b, nil
 }

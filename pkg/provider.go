@@ -23,7 +23,7 @@ type AoriProvider interface {
 	MakeOrder(orderParams MakeOrderInput) (string, error)
 	MakePrivateOrder(orderParams MakeOrderInput) (string, error)
 	TakeOrder()
-	CancelOrder()
+	CancelOrder(orderId, apiKey string) (string, error)
 	SubscribeOrderbook()
 	AccountOrders()
 	OrderStatus()
@@ -272,8 +272,22 @@ func (p *provider) SubscribeOrderbook() {
 	// TODO: impl
 }
 
-func (p *provider) AccountOrders() {
-	// TODO: impl
+func (p *provider) AccountOrders(apiKey string) (string, error) {
+	req, err := util.CreateAccountOrdersPayload(p.lastId, p.walletAddr, p.walletSig, apiKey)
+	if err != nil {
+		return "", fmt.Errorf("account_orders error creating payload: %s", err)
+	}
+	err = p.Send(req)
+	if err != nil {
+		return "", fmt.Errorf("account_orders error sending request: %s", err)
+	}
+
+	res, err := p.Receive()
+	if err != nil {
+		return "", fmt.Errorf("account_orders error getting response: %s", err)
+	}
+
+	return string(res), nil
 }
 
 func (p *provider) OrderStatus() {

@@ -140,6 +140,19 @@ type CancelOrderParams struct {
 	ApiKey    string `json:"apiKey"`
 }
 
+type AccountOrdersRequest struct {
+	Id      int                   `json:"id"`
+	JsonRPC string                `json:"jsonrpc"`
+	Method  string                `json:"method"`
+	Params  []AccountOrdersParams `json:"params"`
+}
+
+type AccountOrdersParams struct {
+	Offerer   string `json:"offerer"`
+	Signature string `json:"signature,omitempty"`
+	ApiKey    string `json:"apiKey,omitempty"`
+}
+
 type OrderParameters struct {
 	Offerer                         string              `json:"offerer"`
 	Zone                            string              `json:"zone"`
