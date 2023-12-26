@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/aori-io/aori-sdk-go/pkg/types"
+	"github.com/ethereum/go-ethereum/crypto"
+	"os"
 	"time"
 )
 
@@ -176,6 +178,39 @@ func CreateOrderStatusPayload(id int, orderHash string) ([]byte, error) {
 		JsonRPC: "2.0",
 		Method:  "aori_orderStatus",
 		Params:  []types.OrderStatusParams{{OrderHash: orderHash}},
+	}
+
+	b, err := json.Marshal(&req)
+	if err != nil {
+		return nil, fmt.Errorf("order_status error marshalling order: %s", err)
+	}
+
+	return b, nil
+}
+
+func CreateCancelAllOrdersPayload(id int, wallet string) ([]byte, error) {
+	key := os.Getenv("PRIVATE_KEY")
+	if key == "" {
+		return nil, fmt.Errorf("missing PRIVATE_KEY")
+	}
+	privateKey, err := crypto.HexToECDSA(key)
+	if err != nil {
+		return nil, err
+	}
+
+	signature, err := PersonalSign(wallet, privateKey)
+	if err != nil {
+		return nil, err
+	}
+
+	req := types.CancelAllOrdersRequest{
+		Id:      id,
+		JsonRPC: "2.0",
+		Method:  "aori_cancelAllOrders",
+		Params: []types.CancelAllOrdersParams{{
+			Offerer:   wallet,
+			Signature: signature,
+		}},
 	}
 
 	b, err := json.Marshal(&req)

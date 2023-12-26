@@ -167,6 +167,18 @@ type OrderStatusParams struct {
 	OrderHash string `json:"orderHash"`
 }
 
+type CancelAllOrdersRequest struct {
+	Id      int                     `json:"id"`
+	JsonRPC string                  `json:"jsonrpc"`
+	Method  string                  `json:"method"`
+	Params  []CancelAllOrdersParams `json:"params"`
+}
+
+type CancelAllOrdersParams struct {
+	Offerer   string `json:"offerer"`
+	Signature string `json:"signature,omitempty"`
+}
+
 type OrderParameters struct {
 	Offerer                         string              `json:"offerer"`
 	Zone                            string              `json:"zone"`

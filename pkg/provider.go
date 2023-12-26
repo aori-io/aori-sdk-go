@@ -27,7 +27,7 @@ type AoriProvider interface {
 	SubscribeOrderbook()
 	AccountOrders(apiKey string) (string, error)
 	OrderStatus(orderHash string) (string, error)
-	CancelAllOrders()
+	CancelAllOrders() (string, error)
 }
 
 type provider struct {
@@ -309,6 +309,20 @@ func (p *provider) OrderStatus(orderHash string) (string, error) {
 	return string(res), nil
 }
 
-func (p *provider) CancelAllOrders() {
-	// TODO: impl
+func (p *provider) CancelAllOrders() (string, error) {
+	req, err := util.CreateCancelAllOrdersPayload(p.lastId, p.walletAddr)
+	if err != nil {
+		return "", fmt.Errorf("account_orders error creating payload: %s", err)
+	}
+	err = p.Send(req)
+	if err != nil {
+		return "", fmt.Errorf("account_orders error sending request: %s", err)
+	}
+
+	res, err := p.Receive()
+	if err != nil {
+		return "", fmt.Errorf("account_orders error getting response: %s", err)
+	}
+
+	return string(res), nil
 }

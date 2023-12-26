@@ -5,6 +5,7 @@ import (
 	"fmt"
 	types2 "github.com/aori-io/aori-sdk-go/pkg/types"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/signer/core/apitypes"
@@ -68,9 +69,8 @@ func SignOrder(order types2.OrderParameters, chainId int) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("error signing typed data: %s", err)
 	}
-	signature := fmt.Sprintf("0x%s", common.Bytes2Hex(sigBytes))
 
-	return signature, nil
+	return hexutil.Encode(sigBytes), nil
 }
 
 // SignTypedData - Sign typed data
