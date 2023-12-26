@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"fmt"
+	"github.com/aori-io/aori-sdk-go/internal/util"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -45,10 +46,10 @@ func InitializeWallet(key, address, nodeURL string) (*bind.TransactOpts, uint64,
 	wallet.Nonce = nil // Set the nonce to nil for auto calculation
 
 	fromAddress := crypto.PubkeyToAddress(*publicKeyECDSA).Hex()
-	signature, err := crypto.Sign(crypto.Keccak256([]byte(address)), privateKey)
+	signature, err := util.PersonalSign(address, privateKey)
 	if err != nil {
 		return nil, 0, "", "", err
 	}
 
-	return wallet, chainID.Uint64(), fromAddress, fmt.Sprintf("0x%x", signature), nil
+	return wallet, chainID.Uint64(), fromAddress, signature, nil
 }

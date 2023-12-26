@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/aori-io/aori-sdk-go/pkg"
+	"github.com/aori-io/aori-sdk-go/pkg/types"
 )
 
 func main() {
@@ -19,7 +20,15 @@ func main() {
 
 	fmt.Println("Received response:", auth)
 
-	response, err := bot.ViewOrderbook(5, "0xD3664B5e72B46eaba722aB6f43c22dBF40181954", "0x2715Ccea428F8c7694f7e78B2C89cb454c5F7294", "BUY")
+	query := types.ViewOrderbookParams{
+		ChainId: 5,
+		Query: types.ViewOrderbookQuery{
+			Base:  "0xD3664B5e72B46eaba722aB6f43c22dBF40181954",
+			Quote: "0x2715Ccea428F8c7694f7e78B2C89cb454c5F7294",
+		},
+	}
+
+	response, err := bot.ViewOrderbook(query)
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}

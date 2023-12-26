@@ -6,6 +6,7 @@ import (
 )
 
 func main() {
+	// TODO not working
 	bot, err := pkg.NewAoriProvider()
 	if err != nil {
 		fmt.Println("error initializing bot: ", err)

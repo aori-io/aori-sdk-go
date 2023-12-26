@@ -52,17 +52,12 @@ func CreateCheckAuthPayload(id int, jwt string) ([]byte, error) {
 	return b, nil
 }
 
-func CreateViewOrderbookPayload(id int, chainId int, base, quote, side string) ([]byte, error) {
+func CreateViewOrderbookPayload(id int, query types.ViewOrderbookParams) ([]byte, error) {
 	req := types.ViewOrderbookRequest{
 		Id:      id,
 		JsonRPC: "2.0",
 		Method:  "aori_viewOrderbook",
-		Params: []types.ViewOrderbookParams{{ChainId: chainId,
-			Query: types.ViewOrderbookQuery{
-				Base:  base,
-				Quote: quote,
-			}, Side: side,
-		}},
+		Params:  []types.ViewOrderbookParams{query},
 	}
 
 	b, err := json.Marshal(&req)
@@ -170,6 +165,22 @@ func CreateAccountOrdersPayload(id int, wallet, signature, apiKey string) ([]byt
 	b, err := json.Marshal(&req)
 	if err != nil {
 		return nil, fmt.Errorf("account_orders error marshalling order: %s", err)
+	}
+
+	return b, nil
+}
+
+func CreateOrderStatusPayload(id int, orderHash string) ([]byte, error) {
+	req := types.OrderStatusRequest{
+		Id:      id,
+		JsonRPC: "2.0",
+		Method:  "aori_orderStatus",
+		Params:  []types.OrderStatusParams{{OrderHash: orderHash}},
+	}
+
+	b, err := json.Marshal(&req)
+	if err != nil {
+		return nil, fmt.Errorf("order_status error marshalling order: %s", err)
 	}
 
 	return b, nil

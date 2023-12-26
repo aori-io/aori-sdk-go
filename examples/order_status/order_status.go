@@ -9,7 +9,7 @@ func main() {
 	// TODO not working
 	bot, err := pkg.NewAoriProvider()
 	if err != nil {
-		fmt.Println("error initializing bot: ", err)
+		fmt.Println("error initializing bot:", err)
 		return
 	}
 
@@ -20,11 +20,12 @@ func main() {
 
 	fmt.Println("Received response:", auth)
 
-	response, err := bot.AccountOrders(auth.Result.Auth)
+	hash := "0x59eba772fac0c9d9f767ef1d3147f44b578801c1bef51169d8986cac2c32031f"
+
+	response, err := bot.OrderStatus(hash)
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
 
 	fmt.Println("Received response:", response)
-
 }

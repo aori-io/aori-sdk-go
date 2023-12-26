@@ -92,34 +92,8 @@ func SignTypedData(typedData apitypes.TypedData, privateKey *ecdsa.PrivateKey) (
 func EncodeForSigning(typedData apitypes.TypedData) ([]byte, error) {
 	hash, _, err := apitypes.TypedDataAndHash(typedData)
 	if err != nil {
-		fmt.Println("HHHH:", err)
 		return nil, err
 	}
 
 	return hash, nil
-}
-
-// SignCancelOrder - Generates signature for cancel_order
-func SignCancelOrder(orderId string) (string, error) {
-	key := os.Getenv("PRIVATE_KEY")
-	if key == "" {
-		return "", fmt.Errorf("missing PRIVATE_KEY")
-	}
-	privateKey, err := crypto.HexToECDSA(key)
-	if err != nil {
-		return "", err
-	}
-
-	hash := crypto.Keccak256Hash([]byte(orderId))
-
-	sigBytes, err := crypto.Sign(hash.Bytes(), privateKey)
-	if err != nil {
-		return "", err
-	}
-
-	sigBytes[64] += 27
-
-	signature := fmt.Sprintf("0x%s", common.Bytes2Hex(sigBytes))
-
-	return signature, nil
 }

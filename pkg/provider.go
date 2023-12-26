@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/aori-io/aori-sdk-go/internal/util"
-	types2 "github.com/aori-io/aori-sdk-go/pkg/types"
+	"github.com/aori-io/aori-sdk-go/pkg/types"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/websocket"
 	"log"
@@ -17,16 +17,16 @@ type AoriProvider interface {
 	Send(msg []byte) error
 	Receive() ([]byte, error)
 	Ping() (string, error)
-	AuthWallet() (types2.AuthWalletResponse, error)
+	AuthWallet() (types.AuthWalletResponse, error)
 	CheckAuth(jwt string) (string, error)
-	ViewOrderbook(chainId int, base, quote, side string) (types2.AoriViewOrderbookResponse, error)
+	ViewOrderbook(query types.ViewOrderbookParams) (types.AoriViewOrderbookResponse, error)
 	MakeOrder(orderParams MakeOrderInput) (string, error)
 	MakePrivateOrder(orderParams MakeOrderInput) (string, error)
 	TakeOrder()
 	CancelOrder(orderId, apiKey string) (string, error)
 	SubscribeOrderbook()
-	AccountOrders()
-	OrderStatus()
+	AccountOrders(apiKey string) (string, error)
+	OrderStatus(orderHash string) (string, error)
 	CancelAllOrders()
 }
 
@@ -62,7 +62,7 @@ func NewAoriProvider() (*provider, error) {
 		log.Fatal("Error initializing wallet:", err)
 	}
 
-	conn, _, err := websocket.DefaultDialer.Dial(types2.RequestURL, nil)
+	conn, _, err := websocket.DefaultDialer.Dial(types.RequestURL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -142,8 +142,8 @@ func (p *provider) Ping() (string, error) {
 	return string(res), nil
 }
 
-func (p *provider) AuthWallet() (types2.AuthWalletResponse, error) {
-	var authWalletResponse types2.AuthWalletResponse
+func (p *provider) AuthWallet() (types.AuthWalletResponse, error) {
+	var authWalletResponse types.AuthWalletResponse
 
 	req, err := util.CreateAuthWalletPayload(p.lastId, p.walletAddr, p.walletSig)
 	if err != nil {
@@ -185,10 +185,10 @@ func (p *provider) CheckAuth(jwt string) (string, error) {
 	return string(res), nil
 }
 
-func (p *provider) ViewOrderbook(chainId int, base, quote, side string) (types2.AoriViewOrderbookResponse, error) {
-	var viewOrderbookResponse types2.AoriViewOrderbookResponse
+func (p *provider) ViewOrderbook(query types.ViewOrderbookParams) (types.AoriViewOrderbookResponse, error) {
+	var viewOrderbookResponse types.AoriViewOrderbookResponse
 
-	req, err := util.CreateViewOrderbookPayload(p.lastId, chainId, base, quote, side)
+	req, err := util.CreateViewOrderbookPayload(p.lastId, query)
 	if err != nil {
 		return viewOrderbookResponse, fmt.Errorf("view_orderbook error creating payload: %s", err)
 	}
@@ -273,6 +273,7 @@ func (p *provider) SubscribeOrderbook() {
 }
 
 func (p *provider) AccountOrders(apiKey string) (string, error) {
+	fmt.Println("ddd", p.walletSig)
 	req, err := util.CreateAccountOrdersPayload(p.lastId, p.walletAddr, p.walletSig, apiKey)
 	if err != nil {
 		return "", fmt.Errorf("account_orders error creating payload: %s", err)
@@ -290,8 +291,22 @@ func (p *provider) AccountOrders(apiKey string) (string, error) {
 	return string(res), nil
 }
 
-func (p *provider) OrderStatus() {
-	// TODO: impl
+func (p *provider) OrderStatus(orderHash string) (string, error) {
+	req, err := util.CreateOrderStatusPayload(p.lastId, orderHash)
+	if err != nil {
+		return "", fmt.Errorf("account_orders error creating payload: %s", err)
+	}
+	err = p.Send(req)
+	if err != nil {
+		return "", fmt.Errorf("account_orders error sending request: %s", err)
+	}
+
+	res, err := p.Receive()
+	if err != nil {
+		return "", fmt.Errorf("account_orders error getting response: %s", err)
+	}
+
+	return string(res), nil
 }
 
 func (p *provider) CancelAllOrders() {

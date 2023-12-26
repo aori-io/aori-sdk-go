@@ -99,9 +99,12 @@ type ViewOrderbookRequest struct {
 }
 
 type ViewOrderbookParams struct {
-	ChainId int                `json:"chainId"`
-	Query   ViewOrderbookQuery `json:"query"`
-	Side    string             `json:"side"`
+	ChainId      int                `json:"chainId,omitempty"`
+	Query        ViewOrderbookQuery `json:"query,omitempty"`
+	Side         string             `json:"side,omitempty"`
+	SortBy       string             `json:"sortBy,omitempty"`
+	InputAmount  string             `json:"inputAmount,omitempty"`
+	OutputAmount string             `json:"outputAmount,omitempty"`
 }
 
 type ViewOrderbookQuery struct {
@@ -151,6 +154,17 @@ type AccountOrdersParams struct {
 	Offerer   string `json:"offerer"`
 	Signature string `json:"signature,omitempty"`
 	ApiKey    string `json:"apiKey,omitempty"`
+}
+
+type OrderStatusRequest struct {
+	Id      int                 `json:"id"`
+	JsonRPC string              `json:"jsonrpc"`
+	Method  string              `json:"method"`
+	Params  []OrderStatusParams `json:"params"`
+}
+
+type OrderStatusParams struct {
+	OrderHash string `json:"orderHash"`
 }
 
 type OrderParameters struct {
