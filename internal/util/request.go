@@ -220,3 +220,19 @@ func CreateCancelAllOrdersPayload(id int, wallet string) ([]byte, error) {
 
 	return b, nil
 }
+
+func CreateSubscribeOrderbookPayload(id int) ([]byte, error) {
+	req := types.SubscribeOrderbookRequest{
+		Id:      id,
+		JsonRPC: "2.0",
+		Method:  "aori_subscribeOrderbook",
+		Params:  []string{},
+	}
+
+	b, err := json.Marshal(&req)
+	if err != nil {
+		return nil, fmt.Errorf("order_status error marshalling order: %s", err)
+	}
+
+	return b, nil
+}

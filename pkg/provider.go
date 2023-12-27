@@ -24,7 +24,7 @@ type AoriProvider interface {
 	MakePrivateOrder(orderParams MakeOrderInput) (string, error)
 	TakeOrder()
 	CancelOrder(orderId, apiKey string) (string, error)
-	SubscribeOrderbook()
+	SubscribeOrderbook() (string, error)
 	AccountOrders(apiKey string) (string, error)
 	OrderStatus(orderHash string) (string, error)
 	CancelAllOrders() (string, error)
@@ -268,8 +268,22 @@ func (p *provider) CancelOrder(orderId, apiKey string) (string, error) {
 	return string(res), nil
 }
 
-func (p *provider) SubscribeOrderbook() {
-	// TODO: impl
+func (p *provider) SubscribeOrderbook() (string, error) {
+	req, err := util.CreateSubscribeOrderbookPayload(p.lastId)
+	if err != nil {
+		return "", fmt.Errorf("error creating ping payload: %s", err)
+	}
+	err = p.Send(req)
+	if err != nil {
+		return "", fmt.Errorf("error sending ping request: %s", err)
+	}
+
+	res, err := p.Receive()
+	if err != nil {
+		return "", fmt.Errorf("error getting response: %s", err)
+	}
+
+	return string(res), nil
 }
 
 func (p *provider) AccountOrders(apiKey string) (string, error) {

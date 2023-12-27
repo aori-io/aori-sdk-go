@@ -179,6 +179,13 @@ type CancelAllOrdersParams struct {
 	Signature string `json:"signature,omitempty"`
 }
 
+type SubscribeOrderbookRequest struct {
+	Id      int      `json:"id"`
+	JsonRPC string   `json:"jsonrpc"`
+	Method  string   `json:"method"`
+	Params  []string `json:"params"`
+}
+
 type OrderParameters struct {
 	Offerer                         string              `json:"offerer"`
 	Zone                            string              `json:"zone"`
