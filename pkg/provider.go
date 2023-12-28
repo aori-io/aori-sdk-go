@@ -20,9 +20,9 @@ type AoriProvider interface {
 	AuthWallet() (types.AuthWalletResponse, error)
 	CheckAuth(jwt string) (string, error)
 	ViewOrderbook(query types.ViewOrderbookParams) (types.AoriViewOrderbookResponse, error)
-	MakeOrder(orderParams MakeOrderInput) (string, error)
-	MakePrivateOrder(orderParams MakeOrderInput) (string, error)
-	TakeOrder()
+	MakeOrder(orderParams types.MakeOrderInput) (string, error)
+	MakePrivateOrder(orderParams types.MakeOrderInput) (string, error)
+	TakeOrder(orderParams types.OrderParameters, orderHash string, seatId int) (string, error)
 	CancelOrder(orderId, apiKey string) (string, error)
 	SubscribeOrderbook() (string, error)
 	AccountOrders(apiKey string) (string, error)
@@ -210,8 +210,8 @@ func (p *provider) ViewOrderbook(query types.ViewOrderbookParams) (types.AoriVie
 	return viewOrderbookResponse, nil
 }
 
-func (p *provider) MakeOrder(orderParams MakeOrderInput) (string, error) {
-	req, err := util.CreateMakeOrderPayload(p.lastId, p.chainId, p.walletAddr, orderParams.SellToken, orderParams.SellAmount, orderParams.BuyToken, orderParams.BuyAmount, true)
+func (p *provider) MakeOrder(orderParams types.MakeOrderInput) (string, error) {
+	req, err := util.CreateMakeOrderPayload(p.lastId, p.chainId, p.walletAddr, orderParams, true)
 	if err != nil {
 		return "", fmt.Errorf("make_order error creating payload: %s", err)
 	}
@@ -228,8 +228,8 @@ func (p *provider) MakeOrder(orderParams MakeOrderInput) (string, error) {
 	return string(res), nil
 }
 
-func (p *provider) MakePrivateOrder(orderParams MakeOrderInput) (string, error) {
-	req, err := util.CreateMakeOrderPayload(p.lastId, p.chainId, p.walletAddr, orderParams.SellToken, orderParams.SellAmount, orderParams.BuyToken, orderParams.BuyAmount, false)
+func (p *provider) MakePrivateOrder(orderParams types.MakeOrderInput) (string, error) {
+	req, err := util.CreateMakeOrderPayload(p.lastId, p.chainId, p.walletAddr, orderParams, false)
 	if err != nil {
 		return "", fmt.Errorf("make_order error creating payload: %s", err)
 	}
@@ -246,8 +246,22 @@ func (p *provider) MakePrivateOrder(orderParams MakeOrderInput) (string, error) 
 	return string(res), nil
 }
 
-func (p *provider) TakeOrder() {
-	// TODO: impl
+func (p *provider) TakeOrder(orderParams types.OrderParameters, orderHash string, seatId int) (string, error) {
+	req, err := util.CreateTakeOrderPayload(p.lastId, p.chainId, seatId, p.walletAddr, orderHash, orderParams)
+	if err != nil {
+		return "", fmt.Errorf("make_order error creating payload: %s", err)
+	}
+	err = p.Send(req)
+	if err != nil {
+		return "", fmt.Errorf("make_order error sending request: %s", err)
+	}
+
+	res, err := p.Receive()
+	if err != nil {
+		return "", fmt.Errorf("make_order error getting response: %s", err)
+	}
+
+	return string(res), nil
 }
 
 func (p *provider) CancelOrder(orderId, apiKey string) (string, error) {

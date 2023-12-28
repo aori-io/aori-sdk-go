@@ -6,6 +6,7 @@ import (
 	"github.com/aori-io/aori-sdk-go/pkg/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -69,7 +70,7 @@ func CreateViewOrderbookPayload(id int, query types.ViewOrderbookParams) ([]byte
 	return b, nil
 }
 
-func CreateMakeOrderPayload(id, chainId int, walletAddress, sellToken, sellAmount, buyToken, buyAmount string, isPublic bool) ([]byte, error) {
+func CreateMakeOrderPayload(id, chainId int, walletAddress string, orderParams types.MakeOrderInput, isPublic bool) ([]byte, error) {
 	startTime := time.Now()
 	endTime := startTime.AddDate(0, 0, 1)
 	req := types.MakeOrderRequest{
@@ -84,17 +85,17 @@ func CreateMakeOrderPayload(id, chainId int, walletAddress, sellToken, sellAmoun
 					Zone:    types.DefaultOrderAddress,
 					Offer: []types.OfferItem{{
 						ItemType:             types.ERC20,
-						Token:                sellToken,
+						Token:                orderParams.SellToken,
 						IdentifierOrCriteria: "0",
-						StartAmount:          sellAmount,
-						EndAmount:            sellAmount,
+						StartAmount:          orderParams.SellAmount,
+						EndAmount:            orderParams.SellAmount,
 					}},
 					Consideration: []types.ConsiderationItem{{
 						ItemType:             types.ERC20,
-						Token:                buyToken,
+						Token:                orderParams.BuyToken,
 						IdentifierOrCriteria: "0",
-						StartAmount:          buyAmount,
-						EndAmount:            buyAmount,
+						StartAmount:          orderParams.BuyAmount,
+						EndAmount:            orderParams.BuyAmount,
 						Recipient:            walletAddress,
 					}},
 					OrderType:                       types.PartialRestricted,
@@ -124,6 +125,84 @@ func CreateMakeOrderPayload(id, chainId int, walletAddress, sellToken, sellAmoun
 		return nil, fmt.Errorf("make_order error marshalling order: %s", err)
 	}
 	return b, nil
+}
+
+func CreateTakeOrderPayload(id, chainId, seatId int, walletAddress, orderId string, orderParams types.OrderParameters) ([]byte, error) {
+	startTime := time.Now()
+	endTime := startTime.AddDate(0, 0, 1)
+
+	// add fees
+	for _, offer := range orderParams.Offer {
+		fmt.Println(offer)
+		startAmount, err := strconv.ParseFloat(offer.StartAmount, 64)
+		if err != nil {
+			return nil, err
+		}
+		endAmount, err := strconv.ParseFloat(offer.EndAmount, 64)
+		if err != nil {
+			return nil, err
+		}
+
+		offer.StartAmount = fmt.Sprintf("%f", startAmount*1.0003)
+		offer.EndAmount = fmt.Sprintf("%f", endAmount*1.0003)
+	}
+
+	req := types.TakeOrderRequest{
+		Id:      id,
+		JsonRPC: "2.0",
+		Method:  "aori_takeOrder",
+		Params: []types.TakeOrderParams{{
+			Order: types.TakeOrderQuery{
+				Signature: "",
+				Parameters: types.OrderParameters{
+					Offerer: walletAddress,
+					Zone:    types.DefaultOrderAddress,
+					Offer: []types.OfferItem{{
+						ItemType:             types.ERC20,
+						Token:                "sellToken",
+						IdentifierOrCriteria: "0",
+						StartAmount:          "sellAmount",
+						EndAmount:            "sellAmount",
+					}},
+					Consideration: []types.ConsiderationItem{{
+						ItemType:             types.ERC20,
+						Token:                "buyToken",
+						IdentifierOrCriteria: "0",
+						StartAmount:          "buyAmount",
+						EndAmount:            "buyAmount",
+						Recipient:            walletAddress,
+					}},
+					OrderType:                       types.PartialRestricted,
+					StartTime:                       fmt.Sprintf("%v", startTime.Unix()),
+					EndTime:                         fmt.Sprintf("%v", endTime.Unix()), // 24 hours later
+					ZoneHash:                        types.DefaultZoneHash,
+					Salt:                            "0",
+					ConduitKey:                      types.DefaultConduitKey,
+					TotalOriginalConsiderationItems: 1,
+					Counter:                         "0",
+				},
+			},
+			OrderId: orderId,
+			ChainId: chainId,
+			SeatId:  seatId,
+		}},
+	}
+
+	sig, err := SignOrder(req.Params[0].Order.Parameters, chainId)
+	if err != nil {
+		return nil, fmt.Errorf("make_order error signing order: %s", err)
+	}
+
+	req.Params[0].Order.Signature = sig
+
+	b, err := json.Marshal(&req)
+	if err != nil {
+		return nil, fmt.Errorf("cancel_order error marshalling order: %s", err)
+	}
+
+	fmt.Println(string(b))
+	return b, nil
+
 }
 
 func CreateCancelOrderPayload(id int, orderId, apiKey string) ([]byte, error) {

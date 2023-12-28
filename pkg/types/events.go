@@ -1,5 +1,12 @@
 package types
 
+type MakeOrderInput struct {
+	SellToken  string
+	SellAmount string
+	BuyToken   string
+	BuyAmount  string
+}
+
 type AoriResponse struct {
 	ID     *uint64   `json:"id"`
 	Result AoriEvent `json:"result"`
@@ -126,6 +133,25 @@ type MakeOrderParams struct {
 }
 
 type MakeOrderQuery struct {
+	Signature  string          `json:"signature"`
+	Parameters OrderParameters `json:"parameters"`
+}
+
+type TakeOrderRequest struct {
+	Id      int               `json:"id"`
+	JsonRPC string            `json:"jsonrpc"`
+	Method  string            `json:"method"`
+	Params  []TakeOrderParams `json:"params"`
+}
+
+type TakeOrderParams struct {
+	Order   TakeOrderQuery `json:"order"`
+	OrderId string         `json:"orderId"`
+	SeatId  int            `json:"seatId"`
+	ChainId int            `json:"chainId"`
+}
+
+type TakeOrderQuery struct {
 	Signature  string          `json:"signature"`
 	Parameters OrderParameters `json:"parameters"`
 }

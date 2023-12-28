@@ -38,17 +38,17 @@ type ConsiderationItem struct {
 	Recipient            string   `json:"recipient"`
 }
 
-type OrderComponents struct {
-	Offerer                         string              `json:"offerer,omitempty"`
-	Zone                            string              `json:"zone,omitempty"`
-	Offer                           []OfferItem         `json:"offer,omitempty"`
-	Consideration                   []ConsiderationItem `json:"consideration,omitempty"`
-	OrderType                       OrderType           `json:"orderType,omitempty"`
-	StartTime                       string              `json:"startTime,omitempty"`
-	EndTime                         string              `json:"endTime,omitempty"`
-	ZoneHash                        string              `json:"zoneHash,omitempty"`
-	Salt                            string              `json:"salt,omitempty"`
-	ConduitKey                      string              `json:"conduitKey,omitempty"`
-	TotalOriginalConsiderationItems int16               `json:"totalOriginalConsiderationItems,omitempty"`
-	Counter                         string              `json:"counter,omitempty"`
-}
+//type OrderComponents struct {
+//	Offerer                         string              `json:"offerer,omitempty"`
+//	Zone                            string              `json:"zone,omitempty"`
+//	Offer                           []OfferItem         `json:"offer,omitempty"`
+//	Consideration                   []ConsiderationItem `json:"consideration,omitempty"`
+//	OrderType                       OrderType           `json:"orderType,omitempty"`
+//	StartTime                       string              `json:"startTime,omitempty"`
+//	EndTime                         string              `json:"endTime,omitempty"`
+//	ZoneHash                        string              `json:"zoneHash,omitempty"`
+//	Salt                            string              `json:"salt,omitempty"`
+//	ConduitKey                      string              `json:"conduitKey,omitempty"`
+//	TotalOriginalConsiderationItems int16               `json:"totalOriginalConsiderationItems,omitempty"`
+//	Counter                         string              `json:"counter,omitempty"`
+//}
