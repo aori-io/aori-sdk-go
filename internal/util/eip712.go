@@ -3,7 +3,7 @@ package util
 import (
 	"crypto/ecdsa"
 	"fmt"
-	types2 "github.com/aori-io/aori-sdk-go/pkg/types"
+	"github.com/aori-io/aori-sdk-go/pkg/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/common/math"
@@ -14,7 +14,7 @@ import (
 )
 
 // SignOrder - Signs Order
-func SignOrder(order types2.OrderParameters, chainId int) (string, error) {
+func SignOrder(order types.OrderParameters, chainId int) (string, error) {
 	message := map[string]interface{}{
 		"offerer": order.Offerer,
 		"zone":    order.Zone,
@@ -45,12 +45,12 @@ func SignOrder(order types2.OrderParameters, chainId int) (string, error) {
 
 	domain := apitypes.TypedDataDomain{
 		Name:              "Seaport",
-		Version:           types2.CurrentSeaportVersion,
+		Version:           types.CurrentSeaportVersion,
 		ChainId:           math.NewHexOrDecimal256(int64(chainId)),
-		VerifyingContract: types2.SeaportAddress,
+		VerifyingContract: types.SeaportAddress,
 	}
 	typedData := apitypes.TypedData{
-		Types:       types2.Eip712OrderType,
+		Types:       types.Eip712OrderType,
 		PrimaryType: "OrderComponents",
 		Domain:      domain,
 		Message:     message,
@@ -65,35 +65,36 @@ func SignOrder(order types2.OrderParameters, chainId int) (string, error) {
 		return "", err
 	}
 
-	sigBytes, err := SignTypedData(typedData, privateKey)
-	if err != nil {
-		return "", fmt.Errorf("error signing typed data: %s", err)
-	}
-
-	return hexutil.Encode(sigBytes), nil
+	return SignTypedData(typedData, privateKey)
 }
 
 // SignTypedData - Sign typed data
-func SignTypedData(typedData apitypes.TypedData, privateKey *ecdsa.PrivateKey) ([]byte, error) {
+func SignTypedData(typedData apitypes.TypedData, privateKey *ecdsa.PrivateKey) (string, error) {
 	hash, err := EncodeForSigning(typedData)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	sig, err := crypto.Sign(hash, privateKey)
-	if err != nil {
-		return nil, err
-	}
-	sig[64] += 27
 
-	return sig, nil
+	signatureBytes, err := crypto.Sign(hash.Bytes(), privateKey)
+	if err != nil {
+		return "", err
+	}
+	signatureBytes[64] += 27
+
+	return hexutil.Encode(signatureBytes), nil
 }
 
 // EncodeForSigning - Encoding the typed data
-func EncodeForSigning(typedData apitypes.TypedData) ([]byte, error) {
-	hash, _, err := apitypes.TypedDataAndHash(typedData)
+func EncodeForSigning(typedData apitypes.TypedData) (*common.Hash, error) {
+	domainSeparator, err := typedData.HashStruct("EIP712Domain", typedData.Domain.Map())
 	if err != nil {
 		return nil, err
 	}
-
-	return hash, nil
+	typedDataHash, err := typedData.HashStruct(typedData.PrimaryType, typedData.Message)
+	if err != nil {
+		return nil, err
+	}
+	rawData := []byte(fmt.Sprintf("\x19\x01%s%s", string(domainSeparator), string(typedDataHash)))
+	hash := crypto.Keccak256Hash(rawData)
+	return &hash, nil
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/aori-io/aori-sdk-go/pkg"
+	"github.com/aori-io/aori-sdk-go/pkg/types"
 )
 
 func main() {
@@ -20,7 +21,7 @@ func main() {
 
 	fmt.Println("Received response:", auth)
 
-	orderParams := pkg.MakeOrderInput{
+	orderParams := types.MakeOrderInput{
 		SellToken:  "0xD3664B5e72B46eaba722aB6f43c22dBF40181954",
 		SellAmount: "100000000", // 100 usdc (6 decimals)
 		BuyToken:   "0x2715Ccea428F8c7694f7e78B2C89cb454c5F7294",
