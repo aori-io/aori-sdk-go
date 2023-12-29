@@ -133,7 +133,6 @@ func CreateTakeOrderPayload(id, chainId, seatId int, walletAddress, orderId stri
 
 	// add fees
 	for _, offer := range orderParams.Offer {
-		fmt.Println(offer)
 		startAmount, err := strconv.ParseFloat(offer.StartAmount, 64)
 		if err != nil {
 			return nil, err

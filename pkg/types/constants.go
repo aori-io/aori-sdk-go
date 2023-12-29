@@ -78,10 +78,6 @@ var Eip712OrderType = apitypes.Types{
 			Type: "bytes32",
 		},
 		{
-			Name: "totalOriginalConsiderationItems",
-			Type: "uint256",
-		},
-		{
 			Name: "counter",
 			Type: "uint256",
 		},

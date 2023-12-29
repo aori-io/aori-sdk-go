@@ -33,14 +33,13 @@ func SignOrder(order types.OrderParameters, chainId int) (string, error) {
 			"endAmount":            order.Consideration[0].EndAmount,
 			"recipient":            order.Consideration[0].Recipient,
 		}},
-		"orderType":                       fmt.Sprintf("%d", order.OrderType),
-		"startTime":                       order.StartTime,
-		"endTime":                         order.EndTime,
-		"zoneHash":                        common.Hex2Bytes(strings.TrimPrefix(order.ZoneHash, "0x")),
-		"salt":                            order.Salt,
-		"conduitKey":                      common.Hex2Bytes(strings.TrimPrefix(order.ConduitKey, "0x")),
-		"totalOriginalConsiderationItems": fmt.Sprintf("%d", order.TotalOriginalConsiderationItems),
-		"counter":                         order.Counter,
+		"orderType":  fmt.Sprintf("%d", order.OrderType),
+		"startTime":  order.StartTime,
+		"endTime":    order.EndTime,
+		"zoneHash":   common.Hex2Bytes(strings.TrimPrefix(order.ZoneHash, "0x")),
+		"salt":       order.Salt,
+		"conduitKey": common.Hex2Bytes(strings.TrimPrefix(order.ConduitKey, "0x")),
+		"counter":    order.Counter,
 	}
 
 	domain := apitypes.TypedDataDomain{
