@@ -19,7 +19,7 @@ func main() {
 
 	fmt.Println("Received response:", auth)
 
-	hash := "0x59eba772fac0c9d9f767ef1d3147f44b578801c1bef51169d8986cac2c32031f"
+	hash := "0x140c5af4f95b5e3f9f1160cc99da9e6ab5ee73741da3f656ebbf39995b13be19"
 
 	response, err := bot.OrderStatus(hash)
 	if err != nil {

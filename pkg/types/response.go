@@ -26,3 +26,12 @@ type AuthWalletResponse struct {
 type AuthWalletData struct {
 	Auth string `json:"auth"`
 }
+
+type OrderStatusResponse struct {
+	ID     int               `json:"id"`
+	Result OrderStatusResult `json:"result"`
+}
+
+type OrderStatusResult struct {
+	Order OrderCreatedData `json:"order"`
+}

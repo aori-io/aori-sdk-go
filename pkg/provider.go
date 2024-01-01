@@ -249,16 +249,16 @@ func (p *provider) MakePrivateOrder(orderParams types.MakeOrderInput) (string, e
 func (p *provider) TakeOrder(orderParams types.OrderParameters, orderHash string, seatId int) (string, error) {
 	req, err := util.CreateTakeOrderPayload(p.lastId, p.chainId, seatId, p.walletAddr, orderHash, orderParams)
 	if err != nil {
-		return "", fmt.Errorf("make_order error creating payload: %s", err)
+		return "", fmt.Errorf("take_order error creating payload: %s", err)
 	}
 	err = p.Send(req)
 	if err != nil {
-		return "", fmt.Errorf("make_order error sending request: %s", err)
+		return "", fmt.Errorf("take_order error sending request: %s", err)
 	}
 
 	res, err := p.Receive()
 	if err != nil {
-		return "", fmt.Errorf("make_order error getting response: %s", err)
+		return "", fmt.Errorf("take_order error getting response: %s", err)
 	}
 
 	return string(res), nil
@@ -267,16 +267,16 @@ func (p *provider) TakeOrder(orderParams types.OrderParameters, orderHash string
 func (p *provider) CancelOrder(orderId, apiKey string) (string, error) {
 	req, err := util.CreateCancelOrderPayload(p.lastId, orderId, apiKey)
 	if err != nil {
-		return "", fmt.Errorf("make_order error creating payload: %s", err)
+		return "", fmt.Errorf("cancel_order error creating payload: %s", err)
 	}
 	err = p.Send(req)
 	if err != nil {
-		return "", fmt.Errorf("make_order error sending request: %s", err)
+		return "", fmt.Errorf("cancel_order error sending request: %s", err)
 	}
 
 	res, err := p.Receive()
 	if err != nil {
-		return "", fmt.Errorf("make_order error getting response: %s", err)
+		return "", fmt.Errorf("cancel_order error getting response: %s", err)
 	}
 
 	return string(res), nil
@@ -319,37 +319,46 @@ func (p *provider) AccountOrders(apiKey string) (string, error) {
 	return string(res), nil
 }
 
-func (p *provider) OrderStatus(orderHash string) (string, error) {
+func (p *provider) OrderStatus(orderHash string) (types.OrderStatusResponse, error) {
+	var orderStatusResponse types.OrderStatusResponse
+
 	req, err := util.CreateOrderStatusPayload(p.lastId, orderHash)
 	if err != nil {
-		return "", fmt.Errorf("account_orders error creating payload: %s", err)
+		return orderStatusResponse, fmt.Errorf("order_status error creating payload: %s", err)
 	}
 	err = p.Send(req)
 	if err != nil {
-		return "", fmt.Errorf("account_orders error sending request: %s", err)
+		return orderStatusResponse, fmt.Errorf("order_status error sending request: %s", err)
 	}
 
 	res, err := p.Receive()
 	if err != nil {
-		return "", fmt.Errorf("account_orders error getting response: %s", err)
+		return orderStatusResponse, fmt.Errorf("order_status error getting response: %s", err)
 	}
 
-	return string(res), nil
+	fmt.Println("RES: ", string(res))
+
+	err = json.Unmarshal(res, &orderStatusResponse)
+	if err != nil {
+		return orderStatusResponse, fmt.Errorf("order_status error getting unmarshalling: %s", err)
+	}
+
+	return orderStatusResponse, nil
 }
 
 func (p *provider) CancelAllOrders() (string, error) {
 	req, err := util.CreateCancelAllOrdersPayload(p.lastId, p.walletAddr)
 	if err != nil {
-		return "", fmt.Errorf("account_orders error creating payload: %s", err)
+		return "", fmt.Errorf("cancel_all_orders error creating payload: %s", err)
 	}
 	err = p.Send(req)
 	if err != nil {
-		return "", fmt.Errorf("account_orders error sending request: %s", err)
+		return "", fmt.Errorf("cancel_all_orders error sending request: %s", err)
 	}
 
 	res, err := p.Receive()
 	if err != nil {
-		return "", fmt.Errorf("account_orders error getting response: %s", err)
+		return "", fmt.Errorf("cancel_all_orders error getting response: %s", err)
 	}
 
 	return string(res), nil

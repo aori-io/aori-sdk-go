@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/aori-io/aori-sdk-go/pkg"
-	"github.com/aori-io/aori-sdk-go/pkg/types"
 )
 
 func main() {
@@ -21,11 +20,19 @@ func main() {
 
 	fmt.Println("Received response:", auth)
 
-	orderParams := types.OrderParameters{}
-	response, err := bot.TakeOrder(orderParams, "OrderHash", 0)
+	orderHash := "0x140c5af4f95b5e3f9f1160cc99da9e6ab5ee73741da3f656ebbf39995b13be19"
+
+	response, err := bot.OrderStatus(orderHash)
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
 
-	fmt.Println("Received response:", response)
+	fmt.Println("Order: ", response.Result.Order.OrderHash, "waht")
+
+	takeResponse, err := bot.TakeOrder(response.Result.Order.Order.Parameters, orderHash, 0)
+	if err != nil {
+		fmt.Println("Error: ", err)
+	}
+
+	fmt.Println("Received response:", takeResponse)
 }

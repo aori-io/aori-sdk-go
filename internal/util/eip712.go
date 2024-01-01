@@ -15,31 +15,44 @@ import (
 
 // SignOrder - Signs Order
 func SignOrder(order types.OrderParameters, chainId int) (string, error) {
+	var offerMessage []map[string]interface{}
+	var considerationMessage []map[string]interface{}
+
+	for _, offer := range order.Offer {
+		m := map[string]interface{}{
+			"itemType":             fmt.Sprintf("%d", offer.ItemType),
+			"token":                offer.Token,
+			"identifierOrCriteria": offer.IdentifierOrCriteria,
+			"startAmount":          offer.StartAmount,
+			"endAmount":            offer.EndAmount,
+		}
+		offerMessage = append(offerMessage, m)
+	}
+
+	for _, consideration := range order.Consideration {
+		m := map[string]interface{}{
+			"itemType":             fmt.Sprintf("%d", consideration.ItemType),
+			"token":                consideration.Token,
+			"identifierOrCriteria": consideration.IdentifierOrCriteria,
+			"startAmount":          consideration.StartAmount,
+			"endAmount":            consideration.EndAmount,
+			"recipient":            consideration.Recipient,
+		}
+		considerationMessage = append(considerationMessage, m)
+	}
+
 	message := map[string]interface{}{
-		"offerer": order.Offerer,
-		"zone":    order.Zone,
-		"offer": []map[string]interface{}{{
-			"itemType":             fmt.Sprintf("%d", order.Offer[0].ItemType),
-			"token":                order.Offer[0].Token,
-			"identifierOrCriteria": order.Offer[0].IdentifierOrCriteria,
-			"startAmount":          order.Offer[0].StartAmount,
-			"endAmount":            order.Offer[0].EndAmount,
-		}},
-		"consideration": []map[string]interface{}{{
-			"itemType":             fmt.Sprintf("%d", order.Consideration[0].ItemType),
-			"token":                order.Consideration[0].Token,
-			"identifierOrCriteria": order.Consideration[0].IdentifierOrCriteria,
-			"startAmount":          order.Consideration[0].StartAmount,
-			"endAmount":            order.Consideration[0].EndAmount,
-			"recipient":            order.Consideration[0].Recipient,
-		}},
-		"orderType":  fmt.Sprintf("%d", order.OrderType),
-		"startTime":  order.StartTime,
-		"endTime":    order.EndTime,
-		"zoneHash":   common.Hex2Bytes(strings.TrimPrefix(order.ZoneHash, "0x")),
-		"salt":       order.Salt,
-		"conduitKey": common.Hex2Bytes(strings.TrimPrefix(order.ConduitKey, "0x")),
-		"counter":    order.Counter,
+		"offerer":       order.Offerer,
+		"zone":          order.Zone,
+		"offer":         offerMessage,
+		"consideration": considerationMessage,
+		"orderType":     fmt.Sprintf("%d", order.OrderType),
+		"startTime":     order.StartTime,
+		"endTime":       order.EndTime,
+		"zoneHash":      common.Hex2Bytes(strings.TrimPrefix(order.ZoneHash, "0x")),
+		"salt":          order.Salt,
+		"conduitKey":    common.Hex2Bytes(strings.TrimPrefix(order.ConduitKey, "0x")),
+		"counter":       order.Counter,
 	}
 
 	domain := apitypes.TypedDataDomain{

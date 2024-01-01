@@ -154,24 +154,11 @@ func CreateTakeOrderPayload(id, chainId, seatId int, walletAddress, orderId stri
 			Order: types.TakeOrderQuery{
 				Signature: "",
 				Parameters: types.OrderParameters{
-					Offerer: walletAddress,
-					Zone:    types.DefaultOrderAddress,
-					Offer: []types.OfferItem{{
-						ItemType:             types.ERC20,
-						Token:                "sellToken",
-						IdentifierOrCriteria: "0",
-						StartAmount:          "sellAmount",
-						EndAmount:            "sellAmount",
-					}},
-					Consideration: []types.ConsiderationItem{{
-						ItemType:             types.ERC20,
-						Token:                "buyToken",
-						IdentifierOrCriteria: "0",
-						StartAmount:          "buyAmount",
-						EndAmount:            "buyAmount",
-						Recipient:            walletAddress,
-					}},
-					OrderType:                       types.PartialRestricted,
+					Offerer:                         walletAddress,
+					Zone:                            types.DefaultOrderAddress,
+					Offer:                           orderParams.Offer,
+					Consideration:                   orderParams.Consideration,
+					OrderType:                       orderParams.OrderType,
 					StartTime:                       fmt.Sprintf("%v", startTime.Unix()),
 					EndTime:                         fmt.Sprintf("%v", endTime.Unix()), // 24 hours later
 					ZoneHash:                        types.DefaultZoneHash,
@@ -189,14 +176,14 @@ func CreateTakeOrderPayload(id, chainId, seatId int, walletAddress, orderId stri
 
 	sig, err := SignOrder(req.Params[0].Order.Parameters, chainId)
 	if err != nil {
-		return nil, fmt.Errorf("make_order error signing order: %s", err)
+		return nil, fmt.Errorf("error signing order: %s", err)
 	}
 
 	req.Params[0].Order.Signature = sig
 
 	b, err := json.Marshal(&req)
 	if err != nil {
-		return nil, fmt.Errorf("cancel_order error marshalling order: %s", err)
+		return nil, fmt.Errorf("error marshalling order: %s", err)
 	}
 
 	fmt.Println(string(b))
