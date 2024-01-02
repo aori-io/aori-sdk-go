@@ -131,6 +131,16 @@ func CreateTakeOrderPayload(id, chainId, seatId int, walletAddress, orderId stri
 	startTime := time.Now()
 	endTime := startTime.AddDate(0, 0, 1)
 
+	// swap offer and consideration
+	for i, _ := range orderParams.Consideration {
+		orderParams.Offer[i].ItemType, orderParams.Consideration[i].ItemType = orderParams.Consideration[i].ItemType, orderParams.Offer[i].ItemType
+		orderParams.Offer[i].StartAmount, orderParams.Consideration[i].StartAmount = orderParams.Consideration[i].StartAmount, orderParams.Offer[i].StartAmount
+		orderParams.Offer[i].EndAmount, orderParams.Consideration[i].EndAmount = orderParams.Consideration[i].EndAmount, orderParams.Offer[i].EndAmount
+		orderParams.Offer[i].Token, orderParams.Consideration[i].Token = orderParams.Consideration[i].Token, orderParams.Offer[i].Token
+		orderParams.Offer[i].IdentifierOrCriteria, orderParams.Consideration[i].IdentifierOrCriteria = orderParams.Consideration[i].IdentifierOrCriteria, orderParams.Offer[i].IdentifierOrCriteria
+		orderParams.Consideration[i].Recipient = walletAddress
+	}
+
 	// add fees
 	for _, offer := range orderParams.Offer {
 		startAmount, err := strconv.ParseFloat(offer.StartAmount, 64)
@@ -186,9 +196,7 @@ func CreateTakeOrderPayload(id, chainId, seatId int, walletAddress, orderId stri
 		return nil, fmt.Errorf("error marshalling order: %s", err)
 	}
 
-	fmt.Println(string(b))
 	return b, nil
-
 }
 
 func CreateCancelOrderPayload(id int, orderId, apiKey string) ([]byte, error) {

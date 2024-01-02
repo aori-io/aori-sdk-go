@@ -26,7 +26,7 @@ type AoriProvider interface {
 	CancelOrder(orderId, apiKey string) (string, error)
 	SubscribeOrderbook() (string, error)
 	AccountOrders(apiKey string) (string, error)
-	OrderStatus(orderHash string) (string, error)
+	OrderStatus(orderHash string) (types.OrderStatusResponse, error)
 	CancelAllOrders() (string, error)
 }
 

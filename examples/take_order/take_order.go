@@ -27,8 +27,6 @@ func main() {
 		fmt.Println("Error: ", err)
 	}
 
-	fmt.Println("Order: ", response.Result.Order.OrderHash, "waht")
-
 	takeResponse, err := bot.TakeOrder(response.Result.Order.Order.Parameters, orderHash, 0)
 	if err != nil {
 		fmt.Println("Error: ", err)
