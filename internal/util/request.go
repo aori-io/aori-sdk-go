@@ -133,7 +133,7 @@ func CreateTakeOrderPayload(id, chainId, seatId int, walletAddress, orderId stri
 	endTime := startTime.AddDate(0, 0, 1)
 
 	// swap offer and consideration
-	for i, _ := range orderParams.Consideration {
+	for i := range orderParams.Consideration {
 		orderParams.Offer[i].ItemType, orderParams.Consideration[i].ItemType = orderParams.Consideration[i].ItemType, orderParams.Offer[i].ItemType
 		orderParams.Offer[i].StartAmount, orderParams.Consideration[i].StartAmount = orderParams.Consideration[i].StartAmount, orderParams.Offer[i].StartAmount
 		orderParams.Offer[i].EndAmount, orderParams.Consideration[i].EndAmount = orderParams.Consideration[i].EndAmount, orderParams.Offer[i].EndAmount
