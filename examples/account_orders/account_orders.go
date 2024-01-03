@@ -24,6 +24,8 @@ func main() {
 		fmt.Println("Error: ", err)
 	}
 
-	fmt.Println("Received response:", response)
-
+	fmt.Println("Received response:", response.ID)
+	for _, order := range response.Result.Orders {
+		fmt.Println("Order: ", order.OrderHash)
+	}
 }

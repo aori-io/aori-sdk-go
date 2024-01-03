@@ -3,6 +3,7 @@ package util
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/aori-io/aori-sdk-go/internal/ethers"
 	"github.com/aori-io/aori-sdk-go/pkg/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"os"
@@ -113,7 +114,7 @@ func CreateMakeOrderPayload(id, chainId int, walletAddress string, orderParams t
 		}},
 	}
 
-	sig, err := SignOrder(req.Params[0].Order.Parameters, chainId)
+	sig, err := ethers.SignOrder(req.Params[0].Order.Parameters, chainId)
 	if err != nil {
 		return nil, fmt.Errorf("make_order error signing order: %s", err)
 	}
@@ -184,7 +185,7 @@ func CreateTakeOrderPayload(id, chainId, seatId int, walletAddress, orderId stri
 		}},
 	}
 
-	sig, err := SignOrder(req.Params[0].Order.Parameters, chainId)
+	sig, err := ethers.SignOrder(req.Params[0].Order.Parameters, chainId)
 	if err != nil {
 		return nil, fmt.Errorf("error signing order: %s", err)
 	}
@@ -200,7 +201,7 @@ func CreateTakeOrderPayload(id, chainId, seatId int, walletAddress, orderId stri
 }
 
 func CreateCancelOrderPayload(id int, orderId, apiKey string) ([]byte, error) {
-	sig, err := SignCancelOrder(orderId)
+	sig, err := ethers.SignCancelOrder(orderId)
 	if err != nil {
 		return nil, err
 	}
@@ -271,7 +272,7 @@ func CreateCancelAllOrdersPayload(id int, wallet string) ([]byte, error) {
 		return nil, err
 	}
 
-	signature, err := PersonalSign(wallet, privateKey)
+	signature, err := ethers.PersonalSign(wallet, privateKey)
 	if err != nil {
 		return nil, err
 	}

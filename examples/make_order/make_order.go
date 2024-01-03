@@ -27,6 +27,9 @@ func main() {
 		BuyAmount:  "750000000000000000", // 0.75 eth (18 decimals)
 	}
 	response, err := bot.MakeOrder(orderParams)
+	// or private:
+	//response, err := bot.MakePrivateOrder(orderParams)
+
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}

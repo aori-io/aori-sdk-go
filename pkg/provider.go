@@ -16,18 +16,18 @@ import (
 type AoriProvider interface {
 	Send(msg []byte) error
 	Receive() ([]byte, error)
-	Ping() (string, error)
-	AuthWallet() (types.AuthWalletResponse, error)
-	CheckAuth(jwt string) (string, error)
-	ViewOrderbook(query types.ViewOrderbookParams) (types.AoriViewOrderbookResponse, error)
-	MakeOrder(orderParams types.MakeOrderInput) (string, error)
-	MakePrivateOrder(orderParams types.MakeOrderInput) (string, error)
-	TakeOrder(orderParams types.OrderParameters, orderHash string, seatId int) (string, error)
-	CancelOrder(orderId, apiKey string) (string, error)
-	SubscribeOrderbook() (string, error)
-	AccountOrders(apiKey string) (string, error)
-	OrderStatus(orderHash string) (types.OrderStatusResponse, error)
+	AccountOrders(apiKey string) (*types.AccountOrdersResponse, error)
+	AuthWallet() (*types.AuthWalletResponse, error)
 	CancelAllOrders() (string, error)
+	CancelOrder(orderId, apiKey string) (string, error)
+	CheckAuth(jwt string) (string, error)
+	MakeOrder(orderParams types.MakeOrderInput) (*types.MakeOrderResponse, error)
+	MakePrivateOrder(orderParams types.MakeOrderInput) (*types.MakeOrderResponse, error)
+	OrderStatus(orderHash string) (*types.OrderStatusResponse, error)
+	Ping() (string, error)
+	SubscribeOrderbook() (string, error)
+	TakeOrder(orderParams types.OrderParameters, orderHash string, seatId int) (string, error)
+	ViewOrderbook(query types.ViewOrderbookParams) (*types.AoriViewOrderbookResponse, error)
 }
 
 type provider struct {
@@ -142,29 +142,29 @@ func (p *provider) Ping() (string, error) {
 	return string(res), nil
 }
 
-func (p *provider) AuthWallet() (types.AuthWalletResponse, error) {
+func (p *provider) AuthWallet() (*types.AuthWalletResponse, error) {
 	var authWalletResponse types.AuthWalletResponse
 
 	req, err := util.CreateAuthWalletPayload(p.lastId, p.walletAddr, p.walletSig)
 	if err != nil {
-		return authWalletResponse, fmt.Errorf("auth_wallet error creating payload: %s", err)
+		return nil, fmt.Errorf("auth_wallet error creating payload: %s", err)
 	}
 	err = p.Send(req)
 	if err != nil {
-		return authWalletResponse, fmt.Errorf("auth_wallet error sending request: %s", err)
+		return nil, fmt.Errorf("auth_wallet error sending request: %s", err)
 	}
 
 	res, err := p.Receive()
 	if err != nil {
-		return authWalletResponse, fmt.Errorf("auth_wallet error getting response: %s", err)
+		return nil, fmt.Errorf("auth_wallet error getting response: %s", err)
 	}
 
 	err = json.Unmarshal(res, &authWalletResponse)
 	if err != nil {
-		return authWalletResponse, fmt.Errorf("auth_wallet error getting unmarshalling: %s", err)
+		return nil, fmt.Errorf("auth_wallet error getting unmarshalling: %s", err)
 	}
 
-	return authWalletResponse, nil
+	return &authWalletResponse, nil
 }
 
 func (p *provider) CheckAuth(jwt string) (string, error) {
@@ -185,65 +185,78 @@ func (p *provider) CheckAuth(jwt string) (string, error) {
 	return string(res), nil
 }
 
-func (p *provider) ViewOrderbook(query types.ViewOrderbookParams) (types.AoriViewOrderbookResponse, error) {
+func (p *provider) ViewOrderbook(query types.ViewOrderbookParams) (*types.AoriViewOrderbookResponse, error) {
 	var viewOrderbookResponse types.AoriViewOrderbookResponse
 
 	req, err := util.CreateViewOrderbookPayload(p.lastId, query)
 	if err != nil {
-		return viewOrderbookResponse, fmt.Errorf("view_orderbook error creating payload: %s", err)
+		return nil, fmt.Errorf("view_orderbook error creating payload: %s", err)
 	}
 	err = p.Send(req)
 	if err != nil {
-		return viewOrderbookResponse, fmt.Errorf("view_orderbook error sending request: %s", err)
+		return nil, fmt.Errorf("view_orderbook error sending request: %s", err)
 	}
 
 	res, err := p.Receive()
 	if err != nil {
-		return viewOrderbookResponse, fmt.Errorf("view_orderbook error getting response: %s", err)
+		return nil, fmt.Errorf("view_orderbook error getting response: %s", err)
 	}
 
 	err = json.Unmarshal(res, &viewOrderbookResponse)
 	if err != nil {
-		return viewOrderbookResponse, fmt.Errorf("view_orderbook error getting unmarshalling: %s", err)
+		return nil, fmt.Errorf("view_orderbook error getting unmarshalling: %s", err)
 	}
 
-	return viewOrderbookResponse, nil
+	return &viewOrderbookResponse, nil
 }
 
-func (p *provider) MakeOrder(orderParams types.MakeOrderInput) (string, error) {
+func (p *provider) MakeOrder(orderParams types.MakeOrderInput) (*types.MakeOrderResponse, error) {
+	var makeOrderResponse types.MakeOrderResponse
 	req, err := util.CreateMakeOrderPayload(p.lastId, p.chainId, p.walletAddr, orderParams, true)
 	if err != nil {
-		return "", fmt.Errorf("make_order error creating payload: %s", err)
+		return nil, fmt.Errorf("make_order error creating payload: %s", err)
 	}
 	err = p.Send(req)
 	if err != nil {
-		return "", fmt.Errorf("make_order error sending request: %s", err)
+		return nil, fmt.Errorf("make_order error sending request: %s", err)
 	}
 
 	res, err := p.Receive()
 	if err != nil {
-		return "", fmt.Errorf("make_order error getting response: %s", err)
+		return nil, fmt.Errorf("make_order error getting response: %s", err)
 	}
 
-	return string(res), nil
+	err = json.Unmarshal(res, &makeOrderResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	return &makeOrderResponse, nil
 }
 
-func (p *provider) MakePrivateOrder(orderParams types.MakeOrderInput) (string, error) {
+func (p *provider) MakePrivateOrder(orderParams types.MakeOrderInput) (*types.MakeOrderResponse, error) {
+	var makeOrderResponse types.MakeOrderResponse
+
 	req, err := util.CreateMakeOrderPayload(p.lastId, p.chainId, p.walletAddr, orderParams, false)
 	if err != nil {
-		return "", fmt.Errorf("make_order error creating payload: %s", err)
+		return nil, fmt.Errorf("make_order error creating payload: %s", err)
 	}
 	err = p.Send(req)
 	if err != nil {
-		return "", fmt.Errorf("make_order error sending request: %s", err)
+		return nil, fmt.Errorf("make_order error sending request: %s", err)
 	}
 
 	res, err := p.Receive()
 	if err != nil {
-		return "", fmt.Errorf("make_order error getting response: %s", err)
+		return nil, fmt.Errorf("make_order error getting response: %s", err)
 	}
 
-	return string(res), nil
+	err = json.Unmarshal(res, &makeOrderResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	return &makeOrderResponse, nil
 }
 
 func (p *provider) TakeOrder(orderParams types.OrderParameters, orderHash string, seatId int) (string, error) {
@@ -300,50 +313,54 @@ func (p *provider) SubscribeOrderbook() (string, error) {
 	return string(res), nil
 }
 
-func (p *provider) AccountOrders(apiKey string) (string, error) {
-	fmt.Println("ddd", p.walletSig)
+func (p *provider) AccountOrders(apiKey string) (*types.AccountOrdersResponse, error) {
+	var accountOrderResponse types.AccountOrdersResponse
+
 	req, err := util.CreateAccountOrdersPayload(p.lastId, p.walletAddr, p.walletSig, apiKey)
 	if err != nil {
-		return "", fmt.Errorf("account_orders error creating payload: %s", err)
+		return nil, fmt.Errorf("account_orders error creating payload: %s", err)
 	}
 	err = p.Send(req)
 	if err != nil {
-		return "", fmt.Errorf("account_orders error sending request: %s", err)
+		return nil, fmt.Errorf("account_orders error sending request: %s", err)
 	}
 
 	res, err := p.Receive()
 	if err != nil {
-		return "", fmt.Errorf("account_orders error getting response: %s", err)
+		return nil, fmt.Errorf("account_orders error getting response: %s", err)
 	}
 
-	return string(res), nil
+	err = json.Unmarshal(res, &accountOrderResponse)
+	if err != nil {
+		return nil, fmt.Errorf("account_orders error getting response: %s", err)
+	}
+
+	return &accountOrderResponse, nil
 }
 
-func (p *provider) OrderStatus(orderHash string) (types.OrderStatusResponse, error) {
+func (p *provider) OrderStatus(orderHash string) (*types.OrderStatusResponse, error) {
 	var orderStatusResponse types.OrderStatusResponse
 
 	req, err := util.CreateOrderStatusPayload(p.lastId, orderHash)
 	if err != nil {
-		return orderStatusResponse, fmt.Errorf("order_status error creating payload: %s", err)
+		return nil, fmt.Errorf("order_status error creating payload: %s", err)
 	}
 	err = p.Send(req)
 	if err != nil {
-		return orderStatusResponse, fmt.Errorf("order_status error sending request: %s", err)
+		return nil, fmt.Errorf("order_status error sending request: %s", err)
 	}
 
 	res, err := p.Receive()
 	if err != nil {
-		return orderStatusResponse, fmt.Errorf("order_status error getting response: %s", err)
+		return nil, fmt.Errorf("order_status error getting response: %s", err)
 	}
-
-	fmt.Println("RES: ", string(res))
 
 	err = json.Unmarshal(res, &orderStatusResponse)
 	if err != nil {
-		return orderStatusResponse, fmt.Errorf("order_status error getting unmarshalling: %s", err)
+		return nil, fmt.Errorf("order_status error getting unmarshalling: %s", err)
 	}
 
-	return orderStatusResponse, nil
+	return &orderStatusResponse, nil
 }
 
 func (p *provider) CancelAllOrders() (string, error) {

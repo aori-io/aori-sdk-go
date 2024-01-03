@@ -35,3 +35,21 @@ type OrderStatusResponse struct {
 type OrderStatusResult struct {
 	Order OrderCreatedData `json:"order"`
 }
+
+type AccountOrdersResponse struct {
+	ID     int                 `json:"id"`
+	Result AccountOrdersResult `json:"result"`
+}
+
+type AccountOrdersResult struct {
+	Orders []OrderCreatedData `json:"orders"`
+}
+
+type MakeOrderResponse struct {
+	ID     int             `json:"id"`
+	Result MakeOrderResult `json:"result"`
+}
+
+type MakeOrderResult struct {
+	Order OrderCreatedData `json:"order"`
+}

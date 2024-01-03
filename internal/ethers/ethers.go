@@ -1,4 +1,4 @@
-package util
+package ethers
 
 import (
 	"crypto/ecdsa"
