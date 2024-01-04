@@ -1,9 +1,12 @@
 # Aori Go SDK
 
+[![Test Status](https://github.com/aori-io/aori-sdk-go/actions/workflows/build.yml/badge.svg)](https://github.com/aori-io/aori-sdk-go/actions)
+[![GoDoc](https://img.shields.io/static/v1?label=godoc&message=reference&color=blue)](https://pkg.go.dev/github.com/aori-io/aori-sdk-go/)
 [![Aori Dev Telegram Chat][tg-badge]][tg-link]
 
 [tg-badge]: https://img.shields.io/endpoint?url=https%3A%2F%2Ftg.sumanjay.workers.dev%2F%2Bdvbw0fIyS-llMmI0&logo=telegram&color=neon
 [tg-link]: https://t.me/+dvbw0fIyS-llMmI0
+
 
 ![H](assets/aori.svg)
 
