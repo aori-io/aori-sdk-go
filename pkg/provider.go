@@ -298,16 +298,16 @@ func (p *provider) CancelOrder(orderId, apiKey string) (string, error) {
 func (p *provider) SubscribeOrderbook() (string, error) {
 	req, err := util.CreateSubscribeOrderbookPayload(p.lastId)
 	if err != nil {
-		return "", fmt.Errorf("error creating ping payload: %s", err)
+		return "", fmt.Errorf("subscribe_orderbook error creating payload: %s", err)
 	}
 	err = p.Send(req)
 	if err != nil {
-		return "", fmt.Errorf("error sending ping request: %s", err)
+		return "", fmt.Errorf("subscribe_orderbook error sending request: %s", err)
 	}
 
 	res, err := p.Receive()
 	if err != nil {
-		return "", fmt.Errorf("error getting response: %s", err)
+		return "", fmt.Errorf("subscribe_orderbook error getting response: %s", err)
 	}
 
 	return string(res), nil
