@@ -7,8 +7,6 @@ import (
 	"github.com/aori-io/aori-sdk-go/pkg/types"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/websocket"
-	"log"
-	"os"
 	"sync"
 	"time"
 )
@@ -44,60 +42,13 @@ type provider struct {
 func NewAoriProvider() (*provider, error) {
 	fmt.Println("Initializing Bot")
 
-	key := os.Getenv("PRIVATE_KEY")
-	if key == "" {
-		return nil, fmt.Errorf("missing PRIVATE_KEY")
-	}
-	address := os.Getenv("WALLET_ADDRESS")
-	if address == "" {
-		return nil, fmt.Errorf("missing WALLET_ADDRESS")
-	}
-	nodeURL := os.Getenv("NODE_URL")
-	if nodeURL == "" {
-		return nil, fmt.Errorf("missing NODE_URL")
-	}
+	return InitializeProvider(types.RequestURL)
+}
 
-	wallet, chainID, walletAddr, walletSig, err := InitializeWallet(key, address, nodeURL)
-	if err != nil {
-		log.Fatal("Error initializing wallet:", err)
-	}
+func NewAoriProviderWithURL(requestURL string) (*provider, error) {
+	fmt.Println("Initializing Bot")
 
-	conn, _, err := websocket.DefaultDialer.Dial(types.RequestURL, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	p := &provider{
-		requestConn: conn,
-		responseCh:  make(chan []byte),
-		wallet:      wallet,
-		chainId:     int(chainID),
-		walletAddr:  walletAddr,
-		walletSig:   walletSig,
-		lastId:      1,
-	}
-
-	go func() {
-		defer func(requestConn *websocket.Conn, requestChan chan []byte) {
-			err := requestConn.Close()
-			if err != nil {
-				fmt.Println("Error closing connection: ", err)
-			}
-
-			close(requestChan)
-		}(p.requestConn, p.responseCh)
-
-		for {
-			_, message, err := p.requestConn.ReadMessage()
-			if err != nil {
-				log.Println("Error receiving message:", err)
-				return
-			}
-			p.responseCh <- message
-		}
-	}()
-
-	return p, nil
+	return InitializeProvider(requestURL)
 }
 
 func (p *provider) Send(msg []byte) error {
