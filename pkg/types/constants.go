@@ -6,12 +6,12 @@ const (
 	DefaultOrderAddress   = "0xEF3137050f3a49ECAe2D2Bae0154B895310D9Dc4"
 	DefaultConduitKey     = "0x0000000000000000000000000000000000000000000000000000000000000000"
 	RequestURL            = "wss://dev.api.aori.io/"
+	MarketFeedURL         = "wss://dev.beta.feed.aori.io/"
 	DefaultZoneHash       = "0x0000000000000000000000000000000000000000000000000000000000000000"
 	SeaportAddress        = "0x00000000000000adc04c56bf30ac9d3c0aaf14dc"
 	CurrentSeaportVersion = "1.5"
 
 	//DEFAULT_DURATION        = 86400000
-	//MARKET_FEED_URL         = "wss://dev.beta.feed.aori.io/"
 )
 
 var Eip712OrderType = apitypes.Types{

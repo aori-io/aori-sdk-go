@@ -6,9 +6,10 @@ import (
 )
 
 func main() {
-	customUrl := "wss://dev.api.aori.io/"
+	customReq := "wss://dev.api.aori.io/"
+	customFeed := "wss://dev.beta.feed.aori.io/"
 
-	bot, err := pkg.NewAoriProviderWithURL(customUrl)
+	bot, err := pkg.NewAoriProviderWithURL(customReq, customFeed)
 	if err != nil {
 		fmt.Println("error initializing bot: ", err)
 		return

@@ -14,6 +14,8 @@ import (
 type AoriProvider interface {
 	Send(msg []byte) error
 	Receive() ([]byte, error)
+	SendFeed(msg []byte) error
+	ReceiveFeed() ([]byte, error)
 	AccountOrders(apiKey string) (*types.AccountOrdersResponse, error)
 	AuthWallet() (*types.AuthWalletResponse, error)
 	CancelAllOrders() (string, error)
@@ -30,7 +32,9 @@ type AoriProvider interface {
 
 type provider struct {
 	requestConn *websocket.Conn
-	responseCh  chan []byte
+	feedConn    *websocket.Conn
+	requestCh   chan []byte
+	feedCh      chan []byte
 	mu          sync.Mutex
 	wallet      *bind.TransactOpts
 	chainId     int
@@ -42,13 +46,13 @@ type provider struct {
 func NewAoriProvider() (*provider, error) {
 	fmt.Println("Initializing Bot")
 
-	return InitializeProvider(types.RequestURL)
+	return InitializeProvider(types.RequestURL, types.MarketFeedURL)
 }
 
-func NewAoriProviderWithURL(requestURL string) (*provider, error) {
+func NewAoriProviderWithURL(requestURL, feedURL string) (*provider, error) {
 	fmt.Println("Initializing Bot")
 
-	return InitializeProvider(requestURL)
+	return InitializeProvider(requestURL, feedURL)
 }
 
 func (p *provider) Send(msg []byte) error {
@@ -68,7 +72,31 @@ func (p *provider) Send(msg []byte) error {
 
 func (p *provider) Receive() ([]byte, error) {
 	select {
-	case msg := <-p.responseCh:
+	case msg := <-p.requestCh:
+		return msg, nil
+	case <-time.After(5 * time.Second): // Adjust timeout as needed
+		return nil, fmt.Errorf("timeout: no response received")
+	}
+}
+
+func (p *provider) SendFeed(msg []byte) error {
+	fmt.Println("Sending message...")
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	err := p.feedConn.WriteMessage(websocket.TextMessage, msg)
+	if err != nil {
+		return err
+	}
+
+	p.lastId++
+
+	return nil
+}
+
+func (p *provider) ReceiveFeed() ([]byte, error) {
+	select {
+	case msg := <-p.feedCh:
 		return msg, nil
 	case <-time.After(5 * time.Second): // Adjust timeout as needed
 		return nil, fmt.Errorf("timeout: no response received")
@@ -251,12 +279,12 @@ func (p *provider) SubscribeOrderbook() (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("subscribe_orderbook error creating payload: %s", err)
 	}
-	err = p.Send(req)
+	err = p.SendFeed(req)
 	if err != nil {
 		return "", fmt.Errorf("subscribe_orderbook error sending request: %s", err)
 	}
 
-	res, err := p.Receive()
+	res, err := p.ReceiveFeed()
 	if err != nil {
 		return "", fmt.Errorf("subscribe_orderbook error getting response: %s", err)
 	}

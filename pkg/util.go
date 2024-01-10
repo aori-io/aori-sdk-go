@@ -5,6 +5,7 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 	"github.com/aori-io/aori-sdk-go/internal/ethers"
+	"github.com/aori-io/aori-sdk-go/internal/util"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -50,7 +51,7 @@ func InitializeWallet(key, address, nodeURL string) (*bind.TransactOpts, uint64,
 	return wallet, chainID.Uint64(), fromAddress, signature, nil
 }
 
-func InitializeProvider(requestUrl string) (*provider, error) {
+func InitializeProvider(requestUrl, feedUrl string) (*provider, error) {
 	key := os.Getenv("PRIVATE_KEY")
 	if key == "" {
 		return nil, fmt.Errorf("missing PRIVATE_KEY")
@@ -69,14 +70,21 @@ func InitializeProvider(requestUrl string) (*provider, error) {
 		log.Fatal("Error initializing wallet:", err)
 	}
 
-	conn, _, err := websocket.DefaultDialer.Dial(requestUrl, nil)
+	reqConn, _, err := websocket.DefaultDialer.Dial(requestUrl, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	feedConn, _, err := websocket.DefaultDialer.Dial(feedUrl, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	p := &provider{
-		requestConn: conn,
-		responseCh:  make(chan []byte),
+		requestConn: reqConn,
+		feedConn:    feedConn,
+		requestCh:   make(chan []byte),
+		feedCh:      make(chan []byte),
 		wallet:      wallet,
 		chainId:     int(chainID),
 		walletAddr:  walletAddr,
@@ -84,25 +92,11 @@ func InitializeProvider(requestUrl string) (*provider, error) {
 		lastId:      1,
 	}
 
-	go func() {
-		defer func(requestConn *websocket.Conn, requestChan chan []byte) {
-			err := requestConn.Close()
-			if err != nil {
-				fmt.Println("Error closing connection: ", err)
-			}
+	// Spin up thread for intercepting req url messages
+	util.ListenToMessages(p.requestConn, p.requestCh)
 
-			close(requestChan)
-		}(p.requestConn, p.responseCh)
-
-		for {
-			_, message, err := p.requestConn.ReadMessage()
-			if err != nil {
-				log.Println("Error receiving message:", err)
-				return
-			}
-			p.responseCh <- message
-		}
-	}()
+	// Spin up thread for intercepting feed url messages
+	util.ListenToMessages(p.feedConn, p.feedCh)
 
 	return p, nil
 }
