@@ -96,10 +96,8 @@ func (p *provider) SendFeed(msg []byte) error {
 }
 
 func (p *provider) ReceiveFeed() ([]byte, error) {
-	select {
-	case msg := <-p.feedCh:
-		return msg, nil
-	}
+	msg := <-p.feedCh
+	return msg, nil
 }
 
 func (p *provider) Ping() (string, error) {
