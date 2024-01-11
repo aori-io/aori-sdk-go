@@ -23,6 +23,7 @@ type AoriProvider interface {
 	CheckAuth(jwt string) (string, error)
 	MakeOrder(orderParams types.MakeOrderInput) (*types.MakeOrderResponse, error)
 	MakePrivateOrder(orderParams types.MakeOrderInput) (*types.MakeOrderResponse, error)
+	OnSubscribe(event types.SubscriptionEvent, handler func(payload []byte))
 	OrderStatus(orderHash string) (*types.OrderStatusResponse, error)
 	Ping() (string, error)
 	SubscribeOrderbook() (string, error)
@@ -98,8 +99,6 @@ func (p *provider) ReceiveFeed() ([]byte, error) {
 	select {
 	case msg := <-p.feedCh:
 		return msg, nil
-	case <-time.After(5 * time.Second): // Adjust timeout as needed
-		return nil, fmt.Errorf("timeout: no response received")
 	}
 }
 
@@ -236,6 +235,18 @@ func (p *provider) MakePrivateOrder(orderParams types.MakeOrderInput) (*types.Ma
 	}
 
 	return &makeOrderResponse, nil
+}
+
+func (p *provider) OnSubscribe(event types.SubscriptionEvent, handler func(payload []byte)) error {
+	fmt.Println("Listening to the orderbook")
+	//for {
+	msg, err := p.ReceiveFeed()
+	if err != nil {
+		return err
+	}
+	handler(msg)
+	//}
+	return nil
 }
 
 func (p *provider) TakeOrder(orderParams types.OrderParameters, orderHash string, seatId int) (string, error) {

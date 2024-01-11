@@ -1,5 +1,16 @@
 package types
 
+type SubscriptionEvent string
+
+const (
+	OrderCreated   SubscriptionEvent = "OrderCreated"
+	OrderCancelled SubscriptionEvent = "OrderCancelled"
+	OrderTaken     SubscriptionEvent = "OrderTaken"
+	OrderFulfilled SubscriptionEvent = "OrderFulfilled"
+	OrderToExecute SubscriptionEvent = "OrderToExecute"
+	QuoteRequested SubscriptionEvent = "QuoteRequested"
+)
+
 type MakeOrderInput struct {
 	SellToken  string
 	SellAmount string
@@ -225,4 +236,31 @@ type OrderParameters struct {
 	ConduitKey                      string              `json:"conduitKey"`
 	TotalOriginalConsiderationItems int16               `json:"totalOriginalConsiderationItems"`
 	Counter                         string              `json:"counter"`
+}
+
+type QuoteRequestedEvent struct {
+	InputToken   string `json:"inputToken"`
+	OutputToken  string `json:"outputToken"`
+	InputAmount  string `json:"inputAmount,omitempty"`
+	OutputAmount string `json:"outputAmount,omitempty"`
+	ChainID      int    `json:"chainId"`
+}
+
+type OrderView struct {
+	Order        OrderWithCounter `json:"order"`
+	OrderHash    string           `json:"orderHash"`
+	InputToken   string           `json:"inputToken"`
+	OutputToken  string           `json:"outputToken"`
+	InputAmount  string           `json:"inputAmount"`
+	OutputAmount string           `json:"outputAmount"`
+	ChainID      int              `json:"chainId"`
+	Rate         int              `json:"rate"`
+	CreatedAt    int64            `json:"createdAt"`
+	IsPublic     bool             `json:"isPublic"`
+}
+
+type OrderWithCounter struct {
+	OrderParameters
+
+	// Define the fields for OrderWithCounter here
 }

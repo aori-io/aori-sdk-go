@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/aori-io/aori-sdk-go/pkg"
+	"github.com/aori-io/aori-sdk-go/pkg/types"
 )
 
 func main() {
@@ -26,4 +27,11 @@ func main() {
 	}
 
 	fmt.Println("Received response:", response)
+
+	err = bot.OnSubscribe(types.OrderCreated, func(payload []byte) {
+		fmt.Print("new order: ", string(payload))
+	})
+	if err != nil {
+		fmt.Println("Error: ", err)
+	}
 }
