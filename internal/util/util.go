@@ -1,7 +1,6 @@
 package util
 
 import (
-	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
 )
@@ -12,7 +11,7 @@ func ListenToMessages(conn *websocket.Conn, ch chan []byte) {
 		defer func(conn *websocket.Conn, feedCh chan []byte) {
 			err := conn.Close()
 			if err != nil {
-				fmt.Println("Error closing feed connection: ", err)
+				log.Fatalln("Error closing feed connection: ", err)
 			}
 
 			close(feedCh)
@@ -21,7 +20,7 @@ func ListenToMessages(conn *websocket.Conn, ch chan []byte) {
 		for {
 			_, message, err := conn.ReadMessage()
 			if err != nil {
-				log.Println("Error receiving feed message:", err)
+				log.Fatalln("Error receiving feed message:", err)
 				return
 			}
 			ch <- message

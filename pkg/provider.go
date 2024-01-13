@@ -7,6 +7,7 @@ import (
 	"github.com/aori-io/aori-sdk-go/pkg/types"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gorilla/websocket"
+	"strings"
 	"sync"
 	"time"
 )
@@ -235,16 +236,24 @@ func (p *provider) MakePrivateOrder(orderParams types.MakeOrderInput) (*types.Ma
 	return &makeOrderResponse, nil
 }
 
-func (p *provider) OnSubscribe(event types.SubscriptionEvent, handler func(payload []byte)) error {
+// OnSubscribe takes a filter (event) to listen on and a callback function (handler) that gets called when
+// the event occurs where message is the payload from the orderbook
+func (p *provider) OnSubscribe(event types.SubscriptionEvent, handler func(message []byte) error) error {
 	fmt.Println("Listening to the orderbook")
-	//for {
-	msg, err := p.ReceiveFeed()
-	if err != nil {
-		return err
+	for {
+		msg, err := p.ReceiveFeed()
+		if err != nil {
+			return err
+		}
+		if !strings.Contains(string(msg), string(event)) {
+			continue
+		}
+
+		err = handler(msg)
+		if err != nil {
+			return err
+		}
 	}
-	handler(msg)
-	//}
-	return nil
 }
 
 func (p *provider) TakeOrder(orderParams types.OrderParameters, orderHash string, seatId int) (string, error) {

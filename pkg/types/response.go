@@ -1,5 +1,7 @@
 package types
 
+// Aori Request Response
+
 type AoriOrderStatusResponse struct {
 	ID     int                 `json:"id"`
 	Result AoriOrderStatusData `json:"result"`
@@ -52,4 +54,61 @@ type MakeOrderResponse struct {
 
 type MakeOrderResult struct {
 	Order OrderCreatedData `json:"order"`
+}
+
+// Aori Feed Subscribe Orderbook Responses
+
+// SubscribeOrderViewResponse For OrderCreated and OrderCancelled
+type SubscribeOrderViewResponse struct {
+	ID     int                      `json:"id"`
+	Result SubscribeOrderViewResult `json:"result"`
+}
+
+type SubscribeOrderViewResult struct {
+	Type string           `json:"type"`
+	Data OrderCreatedData `json:"data"`
+}
+
+// SubscribeTakeOrderResponse For OrderTaken
+type SubscribeTakeOrderResponse struct {
+	ID     int                      `json:"id"`
+	Result SubscribeTakeOrderResult `json:"result"`
+}
+
+type SubscribeTakeOrderResult struct {
+	Type string           `json:"type"`
+	Data OrderCreatedData `json:"data"`
+}
+
+// SubscribeFulfilledOrderResponse For OrderFulfilled
+type SubscribeFulfilledOrderResponse struct {
+	ID     int                           `json:"id"`
+	Result SubscribeFulfilledOrderResult `json:"result"`
+}
+
+type SubscribeFulfilledOrderResult struct {
+	Type string `json:"type"`
+	Data string `json:"data"`
+}
+
+// SubscribeQuoteRequestedResponse For QuoteRequested
+type SubscribeQuoteRequestedResponse struct {
+	ID     int                           `json:"id"`
+	Result SubscribeQuoteRequestedResult `json:"result"`
+}
+
+type SubscribeQuoteRequestedResult struct {
+	Type string                       `json:"type"`
+	Data SubscribeQuoteRequestedEvent `json:"data"`
+}
+
+// SubscribeOrderToExecuteResponse For OrderToExecute
+type SubscribeOrderToExecuteResponse struct {
+	ID     int                           `json:"id"`
+	Result SubscribeOrderToExecuteResult `json:"result"`
+}
+
+type SubscribeOrderToExecuteResult struct {
+	Type string                       `json:"type"`
+	Data SubscribeOrderToExecuteEvent `json:"data"`
 }

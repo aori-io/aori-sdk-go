@@ -238,7 +238,7 @@ type OrderParameters struct {
 	Counter                         string              `json:"counter"`
 }
 
-type QuoteRequestedEvent struct {
+type SubscribeQuoteRequestedEvent struct {
 	InputToken   string `json:"inputToken"`
 	OutputToken  string `json:"outputToken"`
 	InputAmount  string `json:"inputAmount,omitempty"`
@@ -246,21 +246,25 @@ type QuoteRequestedEvent struct {
 	ChainID      int    `json:"chainId"`
 }
 
-type OrderView struct {
-	Order        OrderWithCounter `json:"order"`
-	OrderHash    string           `json:"orderHash"`
-	InputToken   string           `json:"inputToken"`
-	OutputToken  string           `json:"outputToken"`
-	InputAmount  string           `json:"inputAmount"`
-	OutputAmount string           `json:"outputAmount"`
-	ChainID      int              `json:"chainId"`
-	Rate         int              `json:"rate"`
-	CreatedAt    int64            `json:"createdAt"`
-	IsPublic     bool             `json:"isPublic"`
-}
+type SubscribeOrderToExecuteEvent struct {
+	// Relevant order details
+	MakerOrderHash  string          `json:"makerOrderHash"`
+	MakerParameters OrderParameters `json:"makerParameters"`
+	TakerOrderHash  string          `json:"takerOrderHash"`
+	TakerParameters OrderParameters `json:"takerParameters"`
+	MatchingHash    string          `json:"matchingHash"`
 
-type OrderWithCounter struct {
-	OrderParameters
+	// Verification
+	ChainID       int    `json:"chainId"`
+	To            string `json:"to"`
+	Value         int    `json:"value"`
+	Data          string `json:"data"`
+	BlockDeadline int    `json:"blockDeadline"`
 
-	// Define the fields for OrderWithCounter here
+	// Vanity
+	Maker        string `json:"maker"`
+	InputToken   string `json:"inputToken"`
+	InputAmount  string `json:"inputAmount"`
+	OutputToken  string `json:"outputToken"`
+	OutputAmount string `json:"outputAmount"`
 }
