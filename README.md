@@ -73,6 +73,8 @@ Alternatively, one can utilise the subscription to global orderbook events. By d
 
 All relevant orderbook events are under the enum SubscriptionEvents.
 
+> IMPORTANT TO NOTE: The callback in `OnSubscribe` takes a byte slice as an input, meaning it is your responsibility to Unmarshal it into the correct struct. To help you out, below are examples for all Subscription Events.
+
 ```go
 package main
 
