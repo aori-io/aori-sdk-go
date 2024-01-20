@@ -29,7 +29,7 @@ If you have any further questions, refer to [the technical documentation](https:
 To install the SDK:
 
 ```bash
-go get github.com/aori/aori-sdk-go
+github.com/aori-io/aori-sdk-go
 ```
 
 ## Initialization
