@@ -24,7 +24,7 @@ type AoriProvider interface {
 	CheckAuth(jwt string) (string, error)
 	MakeOrder(orderParams types.MakeOrderInput) (*types.MakeOrderResponse, error)
 	MakePrivateOrder(orderParams types.MakeOrderInput) (*types.MakeOrderResponse, error)
-	OnSubscribe(event types.SubscriptionEvent, handler func(payload []byte))
+	OnSubscribe(event types.SubscriptionEvent, handler func(message []byte) error) error
 	OrderStatus(orderHash string) (*types.OrderStatusResponse, error)
 	Ping() (string, error)
 	SubscribeOrderbook() (string, error)
@@ -202,6 +202,8 @@ func (p *provider) MakeOrder(orderParams types.MakeOrderInput) (*types.MakeOrder
 	if err != nil {
 		return nil, fmt.Errorf("make_order error getting response: %s", err)
 	}
+
+	fmt.Println("ello govnor: ", string(res))
 
 	err = json.Unmarshal(res, &makeOrderResponse)
 	if err != nil {

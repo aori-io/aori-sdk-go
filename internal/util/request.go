@@ -7,7 +7,6 @@ import (
 	"github.com/aori-io/aori-sdk-go/pkg/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"os"
-	"strconv"
 	"time"
 )
 
@@ -80,46 +79,35 @@ func CreateMakeOrderPayload(id, chainId int, walletAddress string, orderParams t
 		Method:  "aori_makeOrder",
 		Params: []types.MakeOrderParams{{
 			Order: types.MakeOrderQuery{
-				Signature: "",
 				Parameters: types.OrderParameters{
-					Offerer: walletAddress,
-					Zone:    types.DefaultOrderAddress,
-					Offer: []types.OfferItem{{
-						ItemType:             types.ERC20,
-						Token:                orderParams.SellToken,
-						IdentifierOrCriteria: "0",
-						StartAmount:          orderParams.SellAmount,
-						EndAmount:            orderParams.SellAmount,
-					}},
-					Consideration: []types.ConsiderationItem{{
-						ItemType:             types.ERC20,
-						Token:                orderParams.BuyToken,
-						IdentifierOrCriteria: "0",
-						StartAmount:          orderParams.BuyAmount,
-						EndAmount:            orderParams.BuyAmount,
-						Recipient:            walletAddress,
-					}},
-					OrderType:                       types.PartialRestricted,
-					StartTime:                       fmt.Sprintf("%v", startTime.Unix()),
-					EndTime:                         fmt.Sprintf("%v", endTime.Unix()), // 24 hours later
-					ZoneHash:                        types.DefaultZoneHash,
-					Salt:                            "0",
-					ConduitKey:                      types.DefaultConduitKey,
-					TotalOriginalConsiderationItems: 1,
-					Counter:                         "0",
+					Offerer:       walletAddress,
+					InputToken:    orderParams.SellToken,
+					InputAmount:   orderParams.SellAmount,
+					InputChainID:  uint64(chainId),
+					InputZone:     types.DefaultOrderAddress,
+					OutputToken:   orderParams.BuyToken,
+					OutputAmount:  orderParams.BuyAmount,
+					OutputChainID: uint64(chainId),
+					OutputZone:    types.DefaultOrderAddress,
+					StartTime:     fmt.Sprintf("%v", startTime.Unix()),
+					EndTime:       fmt.Sprintf("%v", endTime.Unix()),
+					Salt:          "0",
+					Counter:       1,
+					ToWithdraw:    false,
 				},
 			},
+			Signer:   types.ZeroAddress,
 			IsPublic: isPublic,
 			ChainId:  chainId,
+			APIKey:   "",
 		}},
 	}
 
-	sig, err := ethers.SignOrder(req.Params[0].Order.Parameters, chainId)
+	sig, err := ethers.SignOrderHash(req.Params[0].Order.Parameters)
 	if err != nil {
 		return nil, fmt.Errorf("make_order error signing order: %s", err)
 	}
-
-	req.Params[0].Order.Signature = sig
+	req.Params[0].Signature = sig
 
 	b, err := json.Marshal(&req)
 	if err != nil {
@@ -132,31 +120,6 @@ func CreateTakeOrderPayload(id, chainId, seatId int, walletAddress, orderId stri
 	startTime := time.Now()
 	endTime := startTime.AddDate(0, 0, 1)
 
-	// swap offer and consideration
-	for i := range orderParams.Consideration {
-		orderParams.Offer[i].ItemType, orderParams.Consideration[i].ItemType = orderParams.Consideration[i].ItemType, orderParams.Offer[i].ItemType
-		orderParams.Offer[i].StartAmount, orderParams.Consideration[i].StartAmount = orderParams.Consideration[i].StartAmount, orderParams.Offer[i].StartAmount
-		orderParams.Offer[i].EndAmount, orderParams.Consideration[i].EndAmount = orderParams.Consideration[i].EndAmount, orderParams.Offer[i].EndAmount
-		orderParams.Offer[i].Token, orderParams.Consideration[i].Token = orderParams.Consideration[i].Token, orderParams.Offer[i].Token
-		orderParams.Offer[i].IdentifierOrCriteria, orderParams.Consideration[i].IdentifierOrCriteria = orderParams.Consideration[i].IdentifierOrCriteria, orderParams.Offer[i].IdentifierOrCriteria
-		orderParams.Consideration[i].Recipient = walletAddress
-	}
-
-	// add fees
-	for _, offer := range orderParams.Offer {
-		startAmount, err := strconv.ParseFloat(offer.StartAmount, 64)
-		if err != nil {
-			return nil, err
-		}
-		endAmount, err := strconv.ParseFloat(offer.EndAmount, 64)
-		if err != nil {
-			return nil, err
-		}
-
-		offer.StartAmount = fmt.Sprintf("%f", startAmount*1.0003)
-		offer.EndAmount = fmt.Sprintf("%f", endAmount*1.0003)
-	}
-
 	req := types.TakeOrderRequest{
 		Id:      id,
 		JsonRPC: "2.0",
@@ -165,18 +128,20 @@ func CreateTakeOrderPayload(id, chainId, seatId int, walletAddress, orderId stri
 			Order: types.TakeOrderQuery{
 				Signature: "",
 				Parameters: types.OrderParameters{
-					Offerer:                         walletAddress,
-					Zone:                            types.DefaultOrderAddress,
-					Offer:                           orderParams.Offer,
-					Consideration:                   orderParams.Consideration,
-					OrderType:                       orderParams.OrderType,
-					StartTime:                       fmt.Sprintf("%v", startTime.Unix()),
-					EndTime:                         fmt.Sprintf("%v", endTime.Unix()), // 24 hours later
-					ZoneHash:                        types.DefaultZoneHash,
-					Salt:                            "0",
-					ConduitKey:                      types.DefaultConduitKey,
-					TotalOriginalConsiderationItems: 1,
-					Counter:                         "0",
+					Offerer:       "",
+					InputToken:    "",
+					InputAmount:   "",
+					InputChainID:  0,
+					InputZone:     "",
+					OutputToken:   "",
+					OutputAmount:  "",
+					OutputChainID: 0,
+					OutputZone:    "",
+					StartTime:     fmt.Sprintf("%v", startTime.Unix()),
+					EndTime:       fmt.Sprintf("%v", endTime.Unix()),
+					Salt:          "",
+					Counter:       0,
+					ToWithdraw:    false,
 				},
 			},
 			OrderId: orderId,
@@ -185,12 +150,12 @@ func CreateTakeOrderPayload(id, chainId, seatId int, walletAddress, orderId stri
 		}},
 	}
 
-	sig, err := ethers.SignOrder(req.Params[0].Order.Parameters, chainId)
-	if err != nil {
-		return nil, fmt.Errorf("error signing order: %s", err)
-	}
+	//sig, err := ethers.SignOrder(req.Params[0].Order.Parameters, chainId)
+	//if err != nil {
+	//	return nil, fmt.Errorf("error signing order: %s", err)
+	//}
 
-	req.Params[0].Order.Signature = sig
+	//req.Params[0].Order.Signature = sig
 
 	b, err := json.Marshal(&req)
 	if err != nil {

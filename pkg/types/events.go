@@ -138,13 +138,15 @@ type MakeOrderRequest struct {
 }
 
 type MakeOrderParams struct {
-	Order    MakeOrderQuery `json:"order"`
-	IsPublic bool           `json:"isPublic"`
-	ChainId  int            `json:"chainId"`
+	Order     MakeOrderQuery `json:"order"`
+	Signer    string         `json:"signer"`
+	Signature string         `json:"signature"`
+	IsPublic  bool           `json:"isPublic"`
+	ChainId   int            `json:"chainId"`
+	APIKey    string         `json:"apiKey"`
 }
 
 type MakeOrderQuery struct {
-	Signature  string          `json:"signature"`
 	Parameters OrderParameters `json:"parameters"`
 }
 
@@ -224,18 +226,20 @@ type SubscribeOrderbookRequest struct {
 }
 
 type OrderParameters struct {
-	Offerer                         string              `json:"offerer"`
-	Zone                            string              `json:"zone"`
-	Offer                           []OfferItem         `json:"offer"`
-	Consideration                   []ConsiderationItem `json:"consideration"`
-	OrderType                       OrderType           `json:"orderType"`
-	StartTime                       string              `json:"startTime"`
-	EndTime                         string              `json:"endTime"`
-	ZoneHash                        string              `json:"zoneHash"`
-	Salt                            string              `json:"salt"`
-	ConduitKey                      string              `json:"conduitKey"`
-	TotalOriginalConsiderationItems int16               `json:"totalOriginalConsiderationItems"`
-	Counter                         string              `json:"counter"`
+	Offerer       string `json:"offerer"`
+	InputToken    string `json:"inputToken"`
+	InputAmount   string `json:"inputAmount"`
+	InputChainID  uint64 `json:"inputChainId"`
+	InputZone     string `json:"inputZone"`
+	OutputToken   string `json:"outputToken"`
+	OutputAmount  string `json:"outputAmount"`
+	OutputChainID uint64 `json:"outputChainId"`
+	OutputZone    string `json:"outputZone"`
+	StartTime     string `json:"startTime"`
+	EndTime       string `json:"endTime"`
+	Salt          string `json:"salt"`
+	Counter       uint64 `json:"counter"`
+	ToWithdraw    bool   `json:"toWithdraw"`
 }
 
 type SubscribeQuoteRequestedEvent struct {
