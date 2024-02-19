@@ -3,6 +3,7 @@ package pkg
 import (
 	"context"
 	"crypto/ecdsa"
+	"encoding/json"
 	"fmt"
 	"github.com/aori-io/aori-sdk-go/internal/ethers"
 	"github.com/aori-io/aori-sdk-go/internal/util"
@@ -99,4 +100,23 @@ func InitializeProvider(requestUrl, feedUrl string) (*provider, error) {
 	util.ListenToMessages(p.feedConn, p.feedCh)
 
 	return p, nil
+}
+
+func PrettyPrintResponse(payload []byte) {
+	// Unmarshal JSON into an interface
+	var data interface{}
+	if err := json.Unmarshal(payload, &data); err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+
+	// Marshal the data back to pretty-printed JSON
+	prettyJSON, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+
+	// Print the pretty-printed JSON as a string
+	fmt.Println(string(prettyJSON))
 }

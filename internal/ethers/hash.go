@@ -1,36 +1,32 @@
 package ethers
 
 import (
-	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"github.com/aori-io/aori-sdk-go/pkg/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"os"
+	solsha3 "github.com/miguelmota/go-solidity-sha3"
 )
 
-func SignOrderHash(order types.OrderParameters) (string, error) {
-	key := os.Getenv("PRIVATE_KEY")
-	if key == "" {
-		return "", fmt.Errorf("missing PRIVATE_KEY")
+// CalculateOrderHash - calculates the hash of an AoriOrder
+func CalculateOrderHash(order types.OrderParameters) (string, error) {
+	types := []string{"address", "address", "uint256", "uint256", "address", "address", "uint256", "uint256", "address", "uint256", "uint256", "uint256", "uint256", "bool"}
+	values := []interface{}{
+		order.Offerer,
+		order.InputToken,
+		order.InputAmount,
+		fmt.Sprintf("%v", order.InputChainID),
+		order.InputZone,
+		order.OutputToken,
+		order.OutputAmount,
+		fmt.Sprintf("%v", order.OutputChainID),
+		order.OutputZone,
+		order.StartTime,
+		order.EndTime,
+		order.Salt,
+		fmt.Sprintf("%v", order.Counter),
+		order.ToWithdraw,
 	}
 
-	privateKey, err := crypto.HexToECDSA(key)
-	if err != nil {
-		return "", err
-	}
-
-	// Convert order to JSON string
-	orderJSON, err := json.Marshal(order)
-	if err != nil {
-		panic(err)
-	}
-
-	// Calculate hash of JSON string
-	hash := sha256.Sum256(orderJSON)
-
-	// Convert hash to hexadecimal string
-	hashStr := hex.EncodeToString(hash[:])
-	return PersonalSign(hashStr, privateKey)
+	hash := solsha3.SoliditySHA3(types, values)
+	return "0x" + hex.EncodeToString(hash), nil
 }

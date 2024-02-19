@@ -138,16 +138,10 @@ type MakeOrderRequest struct {
 }
 
 type MakeOrderParams struct {
-	Order     MakeOrderQuery `json:"order"`
-	Signer    string         `json:"signer"`
-	Signature string         `json:"signature"`
-	IsPublic  bool           `json:"isPublic"`
-	ChainId   int            `json:"chainId"`
-	APIKey    string         `json:"apiKey"`
-}
-
-type MakeOrderQuery struct {
-	Parameters OrderParameters `json:"parameters"`
+	Order     OrderParameters `json:"order"`
+	Signature string          `json:"signature"`
+	IsPublic  bool            `json:"isPublic"`
+	APIKey    string          `json:"apiKey"`
 }
 
 type TakeOrderRequest struct {

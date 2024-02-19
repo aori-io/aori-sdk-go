@@ -53,7 +53,22 @@ type MakeOrderResponse struct {
 }
 
 type MakeOrderResult struct {
-	Order OrderCreatedData `json:"order"`
+	CreatedAt     int64           `json:"createdAt"`
+	InputAmount   string          `json:"inputAmount"`
+	InputChainId  int             `json:"inputChainId"`
+	InputToken    string          `json:"inputToken"`
+	InputZone     string          `json:"inputZone"`
+	IsActive      bool            `json:"isActive"`
+	IsPublic      bool            `json:"isPublic"`
+	LastUpdatedAt int64           `json:"lastUpdatedAt"`
+	Order         OrderParameters `json:"order"`
+	OrderHash     string          `json:"orderHash"`
+	OutputAmount  string          `json:"outputAmount"`
+	OutputChainId int             `json:"outputChainId"`
+	OutputToken   string          `json:"outputToken"`
+	OutputZone    string          `json:"outputZone"`
+	Rate          int             `json:"rate"`
+	Signature     string          `json:"signature"`
 }
 
 // Aori Feed Subscribe Orderbook Responses

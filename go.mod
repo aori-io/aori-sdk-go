@@ -24,6 +24,7 @@ require (
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/holiman/uint256 v1.2.3 // indirect
+	github.com/miguelmota/go-solidity-sha3 v0.1.1 // indirect
 	github.com/mmcloughlin/addchain v0.4.0 // indirect
 	github.com/shirou/gopsutil v3.21.4-0.20210419000835-c7a38de76ee5+incompatible // indirect
 	github.com/storyicon/sigverify v1.1.0 // indirect

@@ -78,32 +78,33 @@ func CreateMakeOrderPayload(id, chainId int, walletAddress string, orderParams t
 		JsonRPC: "2.0",
 		Method:  "aori_makeOrder",
 		Params: []types.MakeOrderParams{{
-			Order: types.MakeOrderQuery{
-				Parameters: types.OrderParameters{
-					Offerer:       walletAddress,
-					InputToken:    orderParams.SellToken,
-					InputAmount:   orderParams.SellAmount,
-					InputChainID:  uint64(chainId),
-					InputZone:     types.DefaultOrderAddress,
-					OutputToken:   orderParams.BuyToken,
-					OutputAmount:  orderParams.BuyAmount,
-					OutputChainID: uint64(chainId),
-					OutputZone:    types.DefaultOrderAddress,
-					StartTime:     fmt.Sprintf("%v", startTime.Unix()),
-					EndTime:       fmt.Sprintf("%v", endTime.Unix()),
-					Salt:          "0",
-					Counter:       1,
-					ToWithdraw:    false,
-				},
+			Order: types.OrderParameters{
+				Offerer:       walletAddress,
+				InputToken:    orderParams.SellToken,
+				InputAmount:   orderParams.SellAmount,
+				InputChainID:  uint64(chainId),
+				InputZone:     types.DefaultOrderAddress,
+				OutputToken:   orderParams.BuyToken,
+				OutputAmount:  orderParams.BuyAmount,
+				OutputChainID: uint64(chainId),
+				OutputZone:    types.DefaultOrderAddress,
+				StartTime:     fmt.Sprintf("%v", startTime.Unix()),
+				EndTime:       fmt.Sprintf("%v", endTime.Unix()),
+				Salt:          "0",
+				Counter:       1,
+				ToWithdraw:    false,
 			},
-			Signer:   types.ZeroAddress,
 			IsPublic: isPublic,
-			ChainId:  chainId,
 			APIKey:   "",
 		}},
 	}
 
-	sig, err := ethers.SignOrderHash(req.Params[0].Order.Parameters)
+	hash, err := ethers.CalculateOrderHash(req.Params[0].Order)
+	if err != nil {
+		panic(err)
+	}
+
+	sig, err := ethers.SignOrderHash(hash)
 	if err != nil {
 		return nil, fmt.Errorf("make_order error signing order: %s", err)
 	}

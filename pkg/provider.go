@@ -203,7 +203,7 @@ func (p *provider) MakeOrder(orderParams types.MakeOrderInput) (*types.MakeOrder
 		return nil, fmt.Errorf("make_order error getting response: %s", err)
 	}
 
-	fmt.Println("ello govnor: ", string(res))
+	PrettyPrintResponse(res)
 
 	err = json.Unmarshal(res, &makeOrderResponse)
 	if err != nil {
