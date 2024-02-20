@@ -152,15 +152,11 @@ type TakeOrderRequest struct {
 }
 
 type TakeOrderParams struct {
-	Order   TakeOrderQuery `json:"order"`
-	OrderId string         `json:"orderId"`
-	SeatId  int            `json:"seatId"`
-	ChainId int            `json:"chainId"`
-}
-
-type TakeOrderQuery struct {
-	Signature  string          `json:"signature"`
-	Parameters OrderParameters `json:"parameters"`
+	Order     OrderParameters `json:"order"`
+	Signature string          `json:"signature"`
+	OrderHash string          `json:"orderHash"`
+	SeatId    int             `json:"seatId"`
+	APIKey    string          `json:"apiKey"`
 }
 
 type CancelOrderRequest struct {

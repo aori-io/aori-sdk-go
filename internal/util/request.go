@@ -117,46 +117,31 @@ func CreateMakeOrderPayload(id, chainId int, walletAddress string, orderParams t
 	return b, nil
 }
 
-func CreateTakeOrderPayload(id, chainId, seatId int, walletAddress, orderId string, orderParams types.OrderParameters) ([]byte, error) {
-	startTime := time.Now()
-	endTime := startTime.AddDate(0, 0, 1)
+func CreateTakeOrderPayload(id, chainId, seatId int, walletAddress, orderHash string, orderParams types.OrderParameters) ([]byte, error) {
 
 	req := types.TakeOrderRequest{
 		Id:      id,
 		JsonRPC: "2.0",
 		Method:  "aori_takeOrder",
 		Params: []types.TakeOrderParams{{
-			Order: types.TakeOrderQuery{
-				Signature: "",
-				Parameters: types.OrderParameters{
-					Offerer:       "",
-					InputToken:    "",
-					InputAmount:   "",
-					InputChainID:  0,
-					InputZone:     "",
-					OutputToken:   "",
-					OutputAmount:  "",
-					OutputChainID: 0,
-					OutputZone:    "",
-					StartTime:     fmt.Sprintf("%v", startTime.Unix()),
-					EndTime:       fmt.Sprintf("%v", endTime.Unix()),
-					Salt:          "",
-					Counter:       0,
-					ToWithdraw:    false,
-				},
-			},
-			OrderId: orderId,
-			ChainId: chainId,
-			SeatId:  seatId,
+			Order:     orderParams,
+			Signature: "",
+			OrderHash: orderHash,
+			APIKey:    "",
+			SeatId:    seatId,
 		}},
 	}
 
-	//sig, err := ethers.SignOrder(req.Params[0].Order.Parameters, chainId)
-	//if err != nil {
-	//	return nil, fmt.Errorf("error signing order: %s", err)
-	//}
+	hash, err := ethers.CalculateOrderHash(req.Params[0].Order)
+	if err != nil {
+		panic(err)
+	}
 
-	//req.Params[0].Order.Signature = sig
+	sig, err := ethers.SignOrderHash(hash)
+	if err != nil {
+		return nil, fmt.Errorf("make_order error signing order: %s", err)
+	}
+	req.Params[0].Signature = sig
 
 	b, err := json.Marshal(&req)
 	if err != nil {
