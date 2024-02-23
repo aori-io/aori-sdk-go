@@ -17,19 +17,17 @@ type AoriProvider interface {
 	Receive() ([]byte, error)
 	SendFeed(msg []byte) error
 	ReceiveFeed() ([]byte, error)
-	AccountOrders(apiKey string) (*types.AccountOrdersResponse, error)
-	AuthWallet() (*types.AuthWalletResponse, error)
 	CancelAllOrders() (string, error)
 	CancelOrder(orderId, apiKey string) (string, error)
-	CheckAuth(jwt string) (string, error)
 	MakeOrder(orderParams types.MakeOrderInput) (*types.MakeOrderResponse, error)
 	MakePrivateOrder(orderParams types.MakeOrderInput) (*types.MakeOrderResponse, error)
 	OnSubscribe(event types.SubscriptionEvent, handler func(message []byte) error) error
-	OrderStatus(orderHash string) (*types.OrderStatusResponse, error)
 	Ping() (string, error)
 	SubscribeOrderbook() (string, error)
 	TakeOrder(orderParams types.OrderParameters, orderHash string, seatId int) (string, error)
 	ViewOrderbook(query types.ViewOrderbookParams) (*types.AoriViewOrderbookResponse, error)
+	// CreateMatchingOrder
+	// AccountDetails
 }
 
 type provider struct {
@@ -114,49 +112,6 @@ func (p *provider) Ping() (string, error) {
 	res, err := p.Receive()
 	if err != nil {
 		return "", fmt.Errorf("error getting response: %s", err)
-	}
-
-	return string(res), nil
-}
-
-func (p *provider) AuthWallet() (*types.AuthWalletResponse, error) {
-	var authWalletResponse types.AuthWalletResponse
-
-	req, err := util.CreateAuthWalletPayload(p.lastId, p.walletAddr, p.walletSig)
-	if err != nil {
-		return nil, fmt.Errorf("auth_wallet error creating payload: %s", err)
-	}
-	err = p.Send(req)
-	if err != nil {
-		return nil, fmt.Errorf("auth_wallet error sending request: %s", err)
-	}
-
-	res, err := p.Receive()
-	if err != nil {
-		return nil, fmt.Errorf("auth_wallet error getting response: %s", err)
-	}
-
-	err = json.Unmarshal(res, &authWalletResponse)
-	if err != nil {
-		return nil, fmt.Errorf("auth_wallet error getting unmarshalling: %s", err)
-	}
-
-	return &authWalletResponse, nil
-}
-
-func (p *provider) CheckAuth(jwt string) (string, error) {
-	req, err := util.CreateCheckAuthPayload(p.lastId, jwt)
-	if err != nil {
-		return "", fmt.Errorf("check_auth error creating payload: %s", err)
-	}
-	err = p.Send(req)
-	if err != nil {
-		return "", fmt.Errorf("check_auth error sending request: %s", err)
-	}
-
-	res, err := p.Receive()
-	if err != nil {
-		return "", fmt.Errorf("check_auth error getting response: %s", err)
 	}
 
 	return string(res), nil
@@ -310,56 +265,6 @@ func (p *provider) SubscribeOrderbook() (string, error) {
 	}
 
 	return string(res), nil
-}
-
-func (p *provider) AccountOrders(apiKey string) (*types.AccountOrdersResponse, error) {
-	var accountOrderResponse types.AccountOrdersResponse
-
-	req, err := util.CreateAccountOrdersPayload(p.lastId, p.walletAddr, p.walletSig, apiKey)
-	if err != nil {
-		return nil, fmt.Errorf("account_orders error creating payload: %s", err)
-	}
-	err = p.Send(req)
-	if err != nil {
-		return nil, fmt.Errorf("account_orders error sending request: %s", err)
-	}
-
-	res, err := p.Receive()
-	if err != nil {
-		return nil, fmt.Errorf("account_orders error getting response: %s", err)
-	}
-
-	err = json.Unmarshal(res, &accountOrderResponse)
-	if err != nil {
-		return nil, fmt.Errorf("account_orders error getting response: %s", err)
-	}
-
-	return &accountOrderResponse, nil
-}
-
-func (p *provider) OrderStatus(orderHash string) (*types.OrderStatusResponse, error) {
-	var orderStatusResponse types.OrderStatusResponse
-
-	req, err := util.CreateOrderStatusPayload(p.lastId, orderHash)
-	if err != nil {
-		return nil, fmt.Errorf("order_status error creating payload: %s", err)
-	}
-	err = p.Send(req)
-	if err != nil {
-		return nil, fmt.Errorf("order_status error sending request: %s", err)
-	}
-
-	res, err := p.Receive()
-	if err != nil {
-		return nil, fmt.Errorf("order_status error getting response: %s", err)
-	}
-
-	err = json.Unmarshal(res, &orderStatusResponse)
-	if err != nil {
-		return nil, fmt.Errorf("order_status error getting unmarshalling: %s", err)
-	}
-
-	return &orderStatusResponse, nil
 }
 
 func (p *provider) CancelAllOrders() (string, error) {
